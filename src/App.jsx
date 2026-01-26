@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react'
-import emailjs from '@emailjs/browser'
 import './App.css'
-
-// Initialize EmailJS (add this at the top of the file after imports)
-emailjs.init('YOUR_EMAILJS_PUBLIC_KEY') // You'll replace this with your actual key
 
 // SVG Logo Component
 function ShyakaLabsLogo({ className = "w-8 h-8" }) {
@@ -230,23 +226,27 @@ function App() {
     if (Object.keys(errors).length === 0) {
       setIsSubmitting(true)
       try {
-        // Send email via EmailJS
-        await emailjs.send(
-          'YOUR_SERVICE_ID', // Replace with your EmailJS service ID
-          'YOUR_TEMPLATE_ID', // Replace with your EmailJS template ID
-          {
-            to_email: 'your-email@example.com', // Your email address where you want to receive messages
-            from_name: formData.name,
-            from_email: formData.email,
-            message: formData.message,
-            reply_to: formData.email
-          }
-        )
+        // Send email via backend API
+        const response = await fetch('/api/sendMail', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            message: formData.message
+          })
+        })
 
-        console.log('Email sent successfully!')
-        setFormSubmitted(true)
-        setFormData({ name: '', email: '', message: '' })
-        setTimeout(() => setFormSubmitted(false), 5000)
+        const data = await response.json()
+
+        if (response.ok) {
+          console.log('Email sent successfully!')
+          setFormSubmitted(true)
+          setFormData({ name: '', email: '', message: '' })
+          setTimeout(() => setFormSubmitted(false), 5000)
+        } else {
+          setFormErrors({ submit: data.message || 'Failed to send message. Please try again.' })
+        }
       } catch (error) {
         console.error('Failed to send email:', error)
         setFormErrors({ submit: 'Failed to send message. Please try again.' })
@@ -680,6 +680,9 @@ function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'dark bg-slate-950 text-slate-50' : 'bg-white text-gray-900'}`}>
+      {/* Countdown Timer - Added at top */}
+      <CountdownTimer languageMode={languageMode} isDark={isDark} />
+
       {/* Header with Love Dedication */}
       <div className={`w-full py-2 text-center text-sm font-semibold ${isDark ? 'bg-rose-900/30 border-b border-rose-700/50 text-rose-300' : 'bg-rose-100/50 border-b border-rose-300 text-rose-700'}`}>
         💝 Built with love and dedication to inspire excellence 💝
@@ -727,8 +730,6 @@ function App() {
           </div>
         </div>
       </header>
-
-      {/* The rest of the main page content continues... */}
 
       {/* Hero Section */}
       <section className={`pt-40 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950' : 'bg-gradient-to-b from-indigo-50 via-white to-white'}`}>
