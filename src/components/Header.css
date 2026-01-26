@@ -56,7 +56,7 @@ header {
 }
 
 @media (max-width: 768px) {
-  .logo {
+  .logo height:20px;
     font-size: 1.3rem;
   }
 
