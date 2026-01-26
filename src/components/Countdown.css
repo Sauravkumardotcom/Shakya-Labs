@@ -1,0 +1,111 @@
+.countdown-section {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  padding: 2.5rem;
+  border-radius: 25px;
+  border: 3px solid rgba(255, 215, 0, 0.3);
+  margin: 2.5rem auto;
+  max-width: 900px;
+  box-shadow: 0 12px 45px rgba(31, 38, 135, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: slideUp 1s ease-out 0.3s both;
+}
+
+.countdown-label {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 1.1rem;
+  margin-bottom: 1.8rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.countdown-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 107, 157, 0.15));
+  padding: 1.8rem 1.3rem;
+  border-radius: 18px;
+  min-width: 100px;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.countdown-unit:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 215, 0, 0.7);
+  box-shadow: 0 12px 35px rgba(255, 215, 0, 0.3);
+}
+
+.countdown-unit .value {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 4px 15px rgba(255, 215, 0, 0.6), 0 0 20px rgba(255, 107, 157, 0.3);
+  font-family: 'Playfair Display', serif;
+}
+
+.countdown-unit .label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.separator {
+  color: var(--accent);
+  font-size: 2.5rem;
+  font-weight: 900;
+  animation: blink 1.5s infinite;
+}
+
+.birthday-message-container {
+  text-align: center;
+}
+
+.birthday-message {
+  font-size: 2.2rem;
+  color: var(--accent);
+  font-weight: 900;
+  animation: bounce 1s ease-in-out infinite;
+  text-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+  font-family: 'Playfair Display', serif;
+}
+
+.birthday-subtext {
+  color: white;
+  margin-top: 1.2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .countdown-section {
+    padding: 1.8rem;
+  }
+
+  .countdown-unit {
+    min-width: 85px;
+    padding: 1.4rem 0.9rem;
+  }
+
+  .countdown-unit .value {
+    font-size: 2.2rem;
+  }
+
+  .separator {
+    font-size: 1.8rem;
+  }
+}

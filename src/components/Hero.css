@@ -1,0 +1,161 @@
+main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  position: relative;
+}
+
+.special-content {
+  text-align: center;
+  max-width: 900px;
+  z-index: 10;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+.heart-animation {
+  font-size: 6rem;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  animation: heartbeat 1.5s ease-in-out infinite;
+  display: inline-block;
+  text-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+}
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  color: white;
+  margin-bottom: 0.3rem;
+  text-shadow: 0 6px 25px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 107, 157, 0.5);
+  font-weight: 900;
+  letter-spacing: -2px;
+}
+
+.subtitle {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  color: var(--accent);
+  font-weight: 700;
+  margin: 0.8rem 0 1.5rem;
+  text-shadow: 0 4px 20px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 107, 157, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.name-display {
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 215, 0, 0.6));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.pet-names {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 1rem 0 2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.pet-names span {
+  color: var(--accent);
+  font-weight: 800;
+  margin: 0 0.5rem;
+}
+
+/* ===== BUTTONS ===== */
+.button-group {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 2.8rem;
+  border: 3px solid var(--accent);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  text-decoration: none;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 12px 35px rgba(255, 107, 157, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: left 0.3s ease;
+  z-index: -1;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 18px 50px rgba(255, 107, 157, 0.7);
+  background: linear-gradient(135deg, var(--accent), var(--primary));
+  color: var(--dark);
+}
+
+.btn:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.btn i {
+  font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+  main {
+    padding: 2rem 0;
+  }
+
+  .heart-animation {
+    font-size: 4rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  .subtitle {
+    font-size: 1.8rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 2rem;
+  }
+}

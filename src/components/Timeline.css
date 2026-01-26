@@ -1,0 +1,118 @@
+.timeline {
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--primary), var(--secondary), var(--accent));
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+}
+
+.timeline-item {
+  margin-bottom: 4rem;
+  position: relative;
+  animation: fadeInScale 0.8s ease-out both;
+}
+
+.timeline-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.timeline-item:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.timeline-item:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.timeline-item:nth-child(4) {
+  animation-delay: 0.4s;
+}
+.timeline-item:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.timeline-item:nth-child(odd) {
+  margin-right: 52%;
+  padding-right: 3.5rem;
+  text-align: right;
+}
+
+.timeline-item:nth-child(even) {
+  margin-left: 52%;
+  padding-left: 3.5rem;
+  text-align: left;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 25px;
+  height: 25px;
+  background: var(--accent);
+  border: 5px solid white;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.7), inset 0 0 10px rgba(255, 215, 0, 0.3);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.timeline-content {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 107, 157, 0.2);
+  border: 2px solid rgba(255, 107, 157, 0.1);
+  transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 45px rgba(255, 107, 157, 0.3);
+  border-color: rgba(255, 107, 157, 0.3);
+}
+
+.timeline-content h4 {
+  color: var(--primary);
+  margin-bottom: 0.8rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.timeline-content p {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.timeline-emoji {
+  font-size: 2rem;
+  margin-top: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .timeline::before {
+    left: 30px;
+  }
+
+  .timeline-item:nth-child(odd),
+  .timeline-item:nth-child(even) {
+    margin: 0;
+    margin-left: 80px;
+    padding: 0;
+    padding-left: 3rem;
+    text-align: left;
+  }
+
+  .timeline-dot {
+    left: 30px;
+  }
+}
