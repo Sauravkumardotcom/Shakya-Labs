@@ -57,11 +57,11 @@ header {
 
 @media (max-width: 768px) {
   .logo 
-    font-size: 7rem;
+    font-size: 3rem;
   }
 
   .back-btn,
   .theme-toggle {
-    font-size: 6rem;
+    font-size: 3rem;
   }
 }
