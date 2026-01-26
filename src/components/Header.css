@@ -1,67 +1,117 @@
+/* =========================
+   HEADER BASE
+========================= */
 header {
   position: sticky;
   top: 0;
   background: rgba(255, 255, 255, 0.95);
   border-bottom: 2px solid rgba(255, 107, 157, 0.2);
-  z-index: 0;
+  z-index: 50; /* important for sticky */
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* =========================
+   DARK MODE
+========================= */
 :root.dark-theme header {
   background: rgba(13, 7, 21, 0.95);
   border-bottom-color: rgba(255, 107, 157, 0.3);
 }
 
+/* =========================
+   HEADER CONTENT
+========================= */
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: .5rem 0;
+  padding: 0.6rem 0;
 }
 
+/* =========================
+   LOGO
+========================= */
 .logo {
   font-family: 'Playfair Display', serif;
-  font-size: 1rem;
+  font-size: 1.8rem;
   font-weight: 900;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--secondary)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-decoration: none;
-  letter-spacing: -3px;
+  letter-spacing: -1.5px;
+  transition: transform 0.3s ease;
 }
 
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* =========================
+   HEADER ACTIONS
+========================= */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.2rem;
 }
 
+/* =========================
+   BUTTONS
+========================= */
 .back-btn,
 .theme-toggle {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: var(--text);
-  transition: all 0.3s ease;
   padding: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .back-btn:hover,
 .theme-toggle:hover {
   color: var(--primary);
-  transform: scale(1.15) rotate(10deg);
+  transform: scale(1.15) rotate(8deg);
 }
 
+/* =========================
+   TABLET & MOBILE
+========================= */
 @media (max-width: 768px) {
-  .logo 
-    font-size: 3rem;
+  .header-content {
+    padding: 0.45rem 0;
+  }
+
+  .logo {
+    font-size: 1.4rem;
+    letter-spacing: -1px;
   }
 
   .back-btn,
   .theme-toggle {
-    font-size: 3rem;
+    font-size: 1.6rem;
+    padding: 0.4rem;
+  }
+}
+
+/* =========================
+   SMALL MOBILE (EXTRA SAFE)
+========================= */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.2rem;
+  }
+
+  .back-btn,
+  .theme-toggle {
+    font-size: 1.4rem;
   }
 }
