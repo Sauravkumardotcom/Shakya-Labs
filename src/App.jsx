@@ -383,7 +383,7 @@ function App() {
                   <ShyakaLabsLogo className="w-10 h-10" />
                 </div>
                 <div>
-                  <span className={`text-2xl font-bold ${isDark ? 'text-indigo-400' : 'text-indigo-900'}`}>
+                  <span className={` font-bold ${isDark ? 'text-indigo-400' : 'text-indigo-900'}`}>
                     Shakya Labs
                   </span>
                   <p className={`text-xs font-light ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>
@@ -408,7 +408,7 @@ function App() {
                 </button>
                 <button
                   onClick={() => setCurrentPage('home')}
-                  className={`px-6 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${isDark ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-900 text-white hover:bg-indigo-800'}`}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${isDark ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-900 text-white hover:bg-indigo-800'}`}
                 >
                   {languageMode === 'english' ? 'Back Home' : 'घर लौटें'}
                 </button>
