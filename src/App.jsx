@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-
+import App from "./App";
 // SVG Logo Component
 function ShyakaLabsLogo({ className = "w-8 h-8" }) {
   return (
