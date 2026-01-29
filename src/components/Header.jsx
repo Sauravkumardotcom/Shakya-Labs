@@ -55,7 +55,7 @@ const Header = ({ isDarkTheme, toggleTheme, languageMode, onLanguageChange, onHo
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <nav className="mobile-menu">
+        <nav className="mobile-menu active">
           <button
             onClick={() => {
               onLanguageChange();
