@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import Header from './components/Header'
 // SVG Logo Component
 function ShyakaLabsLogo({ className = "w-8 h-8" }) {
   return (
@@ -679,59 +680,27 @@ function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'dark bg-slate-950 text-slate-50' : 'bg-white text-gray-900'}`}>
-      {/* Countdown Timer - Added at top */}
-      <CountdownTimer languageMode={languageMode} isDark={isDark} />
+      {/* Modern Header/Navbar */}
+      <Header
+        isDarkTheme={isDark}
+        toggleTheme={() => setIsDark(!isDark)}
+        languageMode={languageMode}
+        onLanguageChange={() => setLanguageMode(languageMode === 'english' ? 'hindi' : 'english')}
+        onHomeClick={() => setCurrentPage('home')}
+      />
 
       {/* Header with Love Dedication */}
       <div className={`w-full py-2 text-center text-sm font-semibold ${isDark ? 'bg-rose-900/30 border-b border-rose-700/50 text-rose-300' : 'bg-rose-100/50 border-b border-rose-300 text-rose-700'}`}>
         💝 Built with love and dedication to inspire excellence 💝
       </div>
 
-      {/* Header */}
-      <header className={`fixed w-full z-40 transition-colors duration-300 ${isDark ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-gray-100'} backdrop-blur-sm border-b shadow-lg`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-3">
-              <div className={`${isDark ? 'text-indigo-400' : 'text-indigo-900'}`}>
-                <ShyakaLabsLogo className="w-10 h-10" />
-              </div>
-              <div>
-                <span className={`text-2xl font-bold ${isDark ? 'text-indigo-400' : 'text-indigo-900'}`}>
-                  Shakya Labs
-                </span>
-                <p className={`text-xs font-light ${isDark ? 'text-rose-400' : 'text-rose-600'}`}>
-                  Built with Love 💕
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setLanguageMode(languageMode === 'english' ? 'hindi' : 'english')}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-all transform hover:scale-105 ${isDark ? 'bg-slate-800 text-indigo-400 hover:bg-slate-700' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'}`}
-              >
-                {languageMode === 'english' ? 'हिंदी' : 'English'}
-              </button>
-              <button
-                onClick={() => setIsDark(!isDark)}
-                className={`p-2 rounded-lg transition-all transform hover:scale-110 ${isDark ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                aria-label="Toggle theme"
-              >
-                {isDark ? '☀️' : '🌙'}
-              </button>
-              <button
-                onClick={() => setCurrentPage('home')}
-                className={`px-6 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${isDark ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-indigo-900 text-white hover:bg-indigo-800'}`}
-              >
-                {languageMode === 'english' ? 'Back Home' : 'घर लौटें'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
-      <section className={`pt-40 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950' : 'bg-gradient-to-b from-indigo-50 via-white to-white'}`}>
+      <section className={`pt-20 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950' : 'bg-gradient-to-b from-indigo-50 via-white to-white'}`}>
+        {/* Countdown Timer - At top of Hero */}
+        <div className="max-w-5xl mx-auto mb-12">
+          <CountdownTimer languageMode={languageMode} isDark={isDark} />
+        </div>
+
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
