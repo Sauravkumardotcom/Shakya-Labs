@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import Header from './components/Header'
+import Header from './components/Header.jsx'
 // SVG Logo Component
 function ShyakaLabsLogo({ className = "w-8 h-8" }) {
   return (
