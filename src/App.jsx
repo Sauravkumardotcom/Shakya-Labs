@@ -227,7 +227,7 @@ function App() {
       setIsSubmitting(true)
       try {
         // Send email via backend API
-        const response = await fetch('/pages/api/sendMail', {
+        const response = await fetch('/api/sendMail', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
