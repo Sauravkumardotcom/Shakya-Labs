@@ -4,7 +4,7 @@ import "./App.css";
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbx4WyAj7-AVtysNpMKEC2y_jhQP8Ek6JW4uMGrVwD_-O3oJLUdAEYctvFhi7n8Nt2Jm/exec";
 
-export default function App() {
+export default function ContactForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
