@@ -7,4 +7,8 @@ export default defineConfig({
     port: 5173,
     host: 'localhost',
   },
+  build: {
+    copyPublicDir: true,
+    assetsInclude: ['**/*.xml', '**/*.txt'],
+  },
 })

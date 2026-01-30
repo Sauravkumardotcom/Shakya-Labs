@@ -2,24 +2,11 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "cleanUrls": false,
-  "trailingSlash": false,
+  "cleanUrls": true,
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "/api/:path*"
-    },
-    {
-      "source": "/:path*\\.xml",
-      "destination": "/:path*\\.xml"
-    },
-    {
-      "source": "/:path*\\.txt",
-      "destination": "/:path*\\.txt"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ]
 }
