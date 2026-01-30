@@ -5,11 +5,11 @@
   "routes": [
     {
       "src": "^/sitemap\\.xml$",
-      "dest": "/api/sitemap.js"
+      "dest": "/api/sitemap"
     },
     {
       "src": "^/robots\\.txt$",
-      "dest": "/api/robots.js"
+      "dest": "/api/robots"
     },
     {
       "src": "/api/(.*)",

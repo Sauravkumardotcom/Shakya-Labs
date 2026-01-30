@@ -1,4 +1,4 @@
-export default function handler(req, res) {
+module.exports = function handler(req, res) {
   const robots = `# Shakya Labs - Robots.txt
 User-agent: *
 Allow: /
@@ -25,4 +25,4 @@ Sitemap: https://shakyalabs.com/api/sitemap`;
   res.setHeader('Content-Type', 'text/plain');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.status(200).send(robots);
-}
+};
