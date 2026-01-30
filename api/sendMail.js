@@ -59,12 +59,10 @@ export default async function handler(req, res) {
 
             <div style="margin-bottom: 20px; border-radius: 5px; overflow: hidden; text-align: center;">
               <p style="color: #667eea; font-size: 14px; margin: 10px 0; font-weight: bold;">📹 Special Message Video:</p>
-              <iframe
-                src="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/preview"
-                style="width:100%;max-width:500px;height:300px;border:2px solid #667eea;border-radius:5px;display:inline-block;"
-                allow="autoplay"
-                allowfullscreen>
-              </iframe>
+              <a href="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/view" style="display:inline-block; text-decoration: none;">
+                <img src="https://drive.google.com/uc?export=view&id=1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E" alt="Play Video" style="width:100%;max-width:500px;height:300px;border:2px solid #667eea;border-radius:5px;display:block;object-fit:cover;">
+              </a>
+              <p style="color: #667eea; font-size: 12px; margin: 8px 0 0 0;">Click image to view video</p>
             </div>
 
             <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
@@ -118,12 +116,10 @@ export default async function handler(req, res) {
 
             <div style="margin-bottom: 20px; border-radius: 5px; overflow: hidden; text-align: center;">
               <p style="color: #667eea; font-size: 14px; margin: 10px 0; font-weight: bold;">📹 Special Message Video:</p>
-              <iframe
-                src="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/preview"
-                style="width:100%;max-width:500px;height:300px;border:2px solid #667eea;border-radius:5px;display:inline-block;"
-                allow="autoplay"
-                allowfullscreen>
-              </iframe>
+              <a href="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/view" style="display:inline-block; text-decoration: none;">
+                <img src="https://drive.google.com/uc?export=view&id=1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E" alt="Play Video" style="width:100%;max-width:500px;height:300px;border:2px solid #667eea;border-radius:5px;display:block;object-fit:cover;cursor:pointer;">
+              </a>
+              <p style="color: #667eea; font-size: 12px; margin: 8px 0 0 0;">Click image to view video</p>
             </div>
 
             <div style="background-color: #e3f2fd; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
