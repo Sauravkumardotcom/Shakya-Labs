@@ -57,6 +57,17 @@ export default async function handler(req, res) {
               <p style="color: #333; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>
             </div>
 
+            <div style="margin-bottom: 20px; border-radius: 5px; overflow: hidden;">
+              <div style="position:relative;padding-top:56.25%;">
+                <iframe
+                  src="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/preview"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;border:2px solid #667eea;border-radius:5px;"
+                  allow="autoplay"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            </div>
+
             <div style="background-color: #e8f5e9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
               <p style="margin: 0; color: #2e7d32; font-size: 14px;">
                 <strong>💡 Quick Action:</strong> Reply directly to this email or use the email address provided above to respond to the user.
@@ -104,6 +115,17 @@ export default async function handler(req, res) {
             <div style="background-color: #fff5f5; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
               <h3 style="color: #764ba2; margin-top: 0;">Your Message:</h3>
               <p style="color: #333; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; margin: 0;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')}</p>
+            </div>
+
+            <div style="margin-bottom: 20px; border-radius: 5px; overflow: hidden;">
+              <div style="position:relative;padding-top:56.25%;">
+                <iframe
+                  src="https://drive.google.com/file/d/1zpuoQTlKka3OnH9A4iYM_AJuDY255r6E/preview"
+                  style="position:absolute;top:0;left:0;width:100%;height:100%;border:2px solid #667eea;border-radius:5px;"
+                  allow="autoplay"
+                  allowfullscreen>
+                </iframe>
+              </div>
             </div>
 
             <div style="background-color: #e3f2fd; padding: 20px; border-radius: 5px; margin-bottom: 20px;">
