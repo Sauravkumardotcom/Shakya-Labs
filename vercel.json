@@ -1,41 +1,14 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "env": {
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASS": "@email_pass"
-  },
-  "functions": {
-    "api/sitemap.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/robots.js": {
-      "runtime": "nodejs18.x"
-    },
-    "api/sendMail.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/sitemap.xml",
-      "dest": "/api/sitemap.js"
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
     },
     {
-      "src": "/robots.txt",
-      "dest": "/api/robots.js"
-    },
-    {
-      "src": "/api/sendMail",
-      "dest": "/api/sendMail.js"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/robots.txt",
+      "destination": "/api/robots"
     }
   ]
 }
