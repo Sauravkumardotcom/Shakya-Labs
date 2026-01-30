@@ -12,6 +12,10 @@
       "dest": "/api/robots"
     },
     {
+      "src": "/api/sendMail",
+      "dest": "/api/sendMail"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1"
     },
