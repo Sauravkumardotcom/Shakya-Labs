@@ -672,10 +672,13 @@ function App() {
                   Welcome to Shakya Labs
                 </div>
                 <h1 className={`text-6xl md:text-7xl font-bold leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Build the Future with <span className={isDark ? 'text-indigo-400' : 'text-indigo-600'}>Precision</span>
+                  <span className={isDark ? 'text-indigo-400' : 'text-indigo-600'}>Shakya Labs</span> — Build the Future with Precision
                 </h1>
-                <p className={`text-2xl font-light ${isDark ? 'text-indigo-300' : 'text-indigo-600'}`}>
+                <p className={`text-xl font-light ${isDark ? 'text-indigo-300' : 'text-indigo-600'}`}>
                   Ancient Wisdom. Modern Engineering.
+                </p>
+                <p className={`text-base leading-relaxed ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>
+                  Shakya Labs delivers scalable software solutions combining time-tested principles with cutting-edge technology.
                 </p>
               </div>
 
@@ -732,10 +735,10 @@ function App() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className={`text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-indigo-900'}`}>
-              Our Philosophy
+              Why Shakya Labs Exists
             </h2>
             <p className={`text-xl ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-              How we approach every challenge and opportunity
+              The core principles that guide Shakya Labs' approach to software engineering
             </p>
           </div>
           
@@ -782,10 +785,10 @@ function App() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className={`text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-indigo-900'}`}>
-              Our Services
+              What Shakya Labs Delivers
             </h2>
             <p className={`text-xl ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-              Comprehensive solutions tailored to your needs
+              Services designed to accelerate your technical success
             </p>
           </div>
           
@@ -820,10 +823,10 @@ function App() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className={`text-5xl font-bold mb-4 ${isDark ? 'text-white' : 'text-indigo-900'}`}>
-              Why Choose Shakya Labs
+              Why Partner with Shakya Labs
             </h2>
             <p className={`text-xl ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>
-              What sets us apart from the rest
+              Four reasons Shakya Labs stands apart in software engineering
             </p>
           </div>
           
@@ -857,10 +860,10 @@ function App() {
         <div className="max-w-3xl mx-auto">
           <div className={`rounded-3xl p-12 transition-all ${isDark ? 'bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800' : 'bg-gradient-to-br from-indigo-900 to-indigo-800 border border-indigo-700'}`}>
             <h2 className="text-4xl font-bold mb-4 text-center text-white">
-              Ready to Build Something Great?
+              Partner with Shakya Labs Today
             </h2>
             <p className="text-center mb-12 text-indigo-100">
-              Have a project in mind? Let's discuss how we can transform your vision into reality and drive measurable success.
+              Have a project in mind? Let's discuss how Shakya Labs can transform your vision into reality and drive measurable business success.
             </p>
 
             {formSubmitted ? (
