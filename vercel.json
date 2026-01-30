@@ -1,23 +1,37 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "public": true,
+  "env": {
+    "EMAIL_USER": "@email_user",
+    "EMAIL_PASS": "@email_pass"
+  },
+  "functions": {
+    "api/sitemap.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/robots.js": {
+      "runtime": "nodejs18.x"
+    },
+    "api/sendMail.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     {
-      "src": "^/sitemap\\.xml$",
-      "dest": "/api/sitemap"
+      "src": "/sitemap.xml",
+      "dest": "/api/sitemap.js"
     },
     {
-      "src": "^/robots\\.txt$",
-      "dest": "/api/robots"
+      "src": "/robots.txt",
+      "dest": "/api/robots.js"
     },
     {
       "src": "/api/sendMail",
-      "dest": "/api/sendMail"
+      "dest": "/api/sendMail.js"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/api/$1.js"
     },
     {
       "src": "/(.*)",
