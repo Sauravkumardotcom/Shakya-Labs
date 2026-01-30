@@ -2,9 +2,23 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
+  "cleanUrls": false,
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!sitemap\\.xml|robots\\.txt|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.js|.*\\.css).*)",
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    },
+    {
+      "source": "/:path*\\.xml",
+      "destination": "/:path*\\.xml"
+    },
+    {
+      "source": "/:path*\\.txt",
+      "destination": "/:path*\\.txt"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
