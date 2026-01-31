@@ -237,15 +237,21 @@ function App() {
           })
         })
 
+        // Validate Content-Type before parsing JSON to prevent HTML error page crashes
+        if (!response.headers.get('content-type')?.includes('application/json')) {
+          throw new Error('Server did not return JSON response')
+        }
+
         const data = await response.json()
 
-        if (response.ok) {
+        // Check for success status AND response status code
+        if (response.ok && data?.status === 'success') {
           console.log('Email sent successfully!')
           setFormSubmitted(true)
           setFormData({ name: '', email: '', message: '' })
           setTimeout(() => setFormSubmitted(false), 5000)
         } else {
-          setFormErrors({ submit: data.message || 'Failed to send message. Please try again.' })
+          setFormErrors({ submit: data?.message || 'Failed to send message. Please try again.' })
         }
       } catch (error) {
         console.error('Failed to send email:', error)
