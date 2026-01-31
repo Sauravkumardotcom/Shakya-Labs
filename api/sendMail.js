@@ -1,18 +1,24 @@
 const nodemailer = require('nodemailer')
 
 module.exports = async function handler(req, res) {
-  // Set JSON response type immediately
+  // Set JSON response type immediately to prevent HTML error responses
   res.setHeader('Content-Type', 'application/json')
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST requests allowed' })
+    return res.status(405).json({ 
+      status: 'error',
+      message: 'Only POST requests allowed' 
+    })
   }
 
   const { name, email, message } = req.body
 
   // Validate input
   if (!name || !email || !message) {
-    return res.status(400).json({ message: 'All fields are required' })
+    return res.status(400).json({ 
+      status: 'error',
+      message: 'All fields are required' 
+    })
   }
 
   // Validate environment variables before attempting to use them
@@ -22,6 +28,7 @@ module.exports = async function handler(req, res) {
       hasEmailPass: !!process.env.EMAIL_PASS,
     })
     return res.status(503).json({ 
+      status: 'error',
       message: 'Email service temporarily unavailable. Please try again later.' 
     })
   }
@@ -169,12 +176,15 @@ module.exports = async function handler(req, res) {
     await transporter.sendMail(adminMailOptions)
     await transporter.sendMail(userMailOptions)
 
+    console.log(`✅ Email sent successfully for ${email}`)
     return res.status(200).json({ 
+      status: 'success',
       message: 'Thank you! Your message has been received. We will get back to you soon!' 
     })
   } catch (error) {
-    console.error('Error sending email:', error)
+    console.error('Error sending email:', error.message, error.stack)
     return res.status(500).json({ 
+      status: 'error',
       message: 'Failed to send message. Please try again later.' 
     })
   }

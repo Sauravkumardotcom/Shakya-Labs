@@ -1,9 +1,6 @@
 import { useState } from "react";
 import "./App.css";
 
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbx4WyAj7-AVtysNpMKEC2y_jhQP8Ek6JW4uMGrVwD_-O3oJLUdAEYctvFhi7n8Nt2Jm/exec";
-
 export default function ContactForm() {
   const [form, setForm] = useState({
     name: "",
@@ -24,21 +21,30 @@ export default function ContactForm() {
     setStatus("");
 
     try {
-      const res = await fetch(SCRIPT_URL, {
+      const res = await fetch("/api/sendMail", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(form),
       });
 
+      // Ensure we can parse the response as JSON
+      if (!res.headers.get('content-type')?.includes('application/json')) {
+        throw new Error('Server did not return JSON response');
+      }
+
       const data = await res.json();
 
-      if (data.status === "success") {
-        setStatus("✅ Data saved successfully!");
+      if (res.ok && data.status === "success") {
+        setStatus("✅ Message sent successfully! We'll get back to you soon.");
         setForm({ name: "", email: "", message: "" });
       } else {
-        setStatus("❌ Failed to save data");
+        setStatus(`❌ ${data?.message || "Failed to send message. Please try again."}`);
       }
     } catch (err) {
-      setStatus("❌ Network error");
+      console.error("Failed to send email:", err);
+      setStatus("❌ Network error. Please try again later.");
     } finally {
       setLoading(false);
     }
