@@ -1,6 +1,6 @@
-const nodemailer = require('nodemailer')
+import nodemailer from 'nodemailer'
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   // Set JSON response type immediately to prevent HTML error responses
   res.setHeader('Content-Type', 'application/json')
 
