@@ -1,27 +1,32 @@
 const nodemailer = require('nodemailer')
 
 module.exports = async function handler(req, res) {
-  // Set JSON response header
+  // Set JSON response type immediately
   res.setHeader('Content-Type', 'application/json')
-  
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ status: 'error', message: 'Only POST requests allowed' })
+    return res.status(405).json({ message: 'Only POST requests allowed' })
   }
 
   const { name, email, message } = req.body
 
   // Validate input
   if (!name || !email || !message) {
-    return res.status(400).json({ status: 'error', message: 'All fields are required' })
+    return res.status(400).json({ message: 'All fields are required' })
+  }
+
+  // Validate environment variables before attempting to use them
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error('Missing email configuration:', {
+      hasEmailUser: !!process.env.EMAIL_USER,
+      hasEmailPass: !!process.env.EMAIL_PASS,
+    })
+    return res.status(503).json({ 
+      message: 'Email service temporarily unavailable. Please try again later.' 
+    })
   }
 
   try {
-    // Check if email credentials are set
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error('Email credentials not configured')
-      return res.status(500).json({ status: 'error', message: 'Email service is not properly configured. Please contact support.' })
-    }
-
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -165,25 +170,12 @@ module.exports = async function handler(req, res) {
     await transporter.sendMail(userMailOptions)
 
     return res.status(200).json({ 
-      status: 'success',
       message: 'Thank you! Your message has been received. We will get back to you soon!' 
     })
   } catch (error) {
-    console.error('Error sending email:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack,
-      emailUser: process.env.EMAIL_USER ? 'SET' : 'NOT SET',
-      emailPass: process.env.EMAIL_PASS ? 'SET' : 'NOT SET'
+    console.error('Error sending email:', error)
+    return res.status(500).json({ 
+      message: 'Failed to send message. Please try again later.' 
     })
-    
-    // Ensure we always return JSON
-    if (!res.headersSent) {
-      return res.status(500).json({ 
-        status: 'error',
-        message: 'Failed to send message. Please try again later.',
-        debug: process.env.NODE_ENV === 'development' ? error.message : undefined
-      })
-    }
   }
 }
