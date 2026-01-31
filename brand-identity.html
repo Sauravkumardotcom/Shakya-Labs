@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shakya Labs brand identity presentation. Fusing ancient symmetry with futuristic engineering.">
+  <meta name="theme-color" content="#030712">
+  
+  <title>Shakya Labs - Brand Identity</title>
+  
+  <!-- Font Loading - Best Practice: Preconnect + Link -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ============================================================
+       CORE RESET & VARIABLES
+       ============================================================ */
+    :root {
+      --bg-color: #030712;
+      --card-bg: #0f172a;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --accent-cyan: #22d3ee;
+      --accent-blue: #3b82f6;
+      --border: #1e293b;
+      
+      /* Additional utility variables for consistency */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --spacing-xs: 5px;
+      --spacing-sm: 10px;
+      --spacing-md: 15px;
+      --spacing-lg: 20px;
+      --spacing-xl: 30px;
+      --spacing-2xl: 40px;
+      --spacing-3xl: 50px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    body {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      
+      /* Improved mobile padding */
+      @media (max-width: 480px) {
+        padding: var(--spacing-xl) var(--spacing-md);
+      }
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+       ============================================================ */
+    h1, h2, h3, .brand-font {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+    }
+
+    h1 {
+      font-size: 3rem;
+      line-height: 1.1;
+      margin-bottom: var(--spacing-md);
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+      
+      @media (max-width: 480px) {
+        font-size: 1.75rem;
+      }
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      
+      @media (max-width: 480px) {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* ============================================================
+       LAYOUT CONTAINERS
+       ============================================================ */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: var(--spacing-xl);
+      margin-bottom: var(--spacing-3xl);
+    }
+
+    .eyebrow {
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: var(--spacing-sm);
+      display: block;
+    }
+
+    .intro-text {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      line-height: 1.7;
+      
+      @media (max-width: 480px) {
+        font-size: 1rem;
+      }
+    }
+
+    /* ============================================================
+       LOGO SHOWCASE SECTION
+       ============================================================ */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-2xl);
+      margin-bottom: var(--spacing-3xl);
+      
+      @media (min-width: 768px) {
+        grid-template-columns: 3fr 2fr;
+      }
+    }
+
+    .logo-box {
+      background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      min-height: 300px;
+      
+      /* Improved mobile scaling */
+      @media (max-width: 480px) {
+        padding: var(--spacing-xl);
+        min-height: 250px;
+      }
+    }
+
+    /* Subtle glow backdrop */
+    .logo-box::before {
+      content: '';
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: var(--accent-blue);
+      filter: blur(80px);
+      opacity: 0.15;
+      border-radius: 50%;
+      z-index: 0;
+    }
+
+    .logo-svg {
+      position: relative;
+      z-index: 10;
+      max-width: 100%;
+      height: auto;
+      width: 100%;
+      
+      /* Scale responsively on mobile */
+      @media (max-width: 480px) {
+        max-width: 90%;
+      }
+    }
+
+    /* Optional: Animated SVG states (disabled by default, respects prefers-reduced-motion) */
+    @supports (animation: test) {
+      @media (prefers-reduced-motion: no-preference) {
+        .logo-svg {
+          transition: transform 0.3s ease;
+        }
+        
+        .logo-box:hover .logo-svg {
+          transform: scale(1.02);
+        }
+      }
+    }
+
+    /* ============================================================
+       CONCEPT CARDS
+       ============================================================ */
+    .concept-box h3 {
+      margin-bottom: var(--spacing-md);
+    }
+
+    .concept-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-lg);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-sm);
+      transition: border-color 0.2s ease;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .card {
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .card:hover {
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+      }
+    }
+
+    .card-icon {
+      margin-bottom: var(--spacing-sm);
+      color: var(--accent-cyan);
+      font-size: 1.5rem;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ============================================================
+       VARIATIONS SECTION
+       ============================================================ */
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-2xl);
+      padding-left: var(--spacing-md);
+      border-left: 4px solid var(--accent-cyan);
+    }
+
+    .variations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-3xl);
+      
+      @media (max-width: 480px) {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+      }
+    }
+
+    .var-box {
+      border-radius: var(--radius-md);
+      padding: var(--spacing-2xl) var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-lg);
+      text-align: center;
+      transition: transform 0.2s ease;
+      
+      @media (max-width: 480px) {
+        padding: var(--spacing-xl) var(--spacing-md);
+      }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .var-box {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .var-box:hover {
+        transform: translateY(-2px);
+      }
+    }
+
+    .var-box.light {
+      background: white;
+      color: black;
+    }
+
+    .var-box.icon {
+      background: linear-gradient(135deg, #1e3a8a, #0f172a);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .var-box.blueprint {
+      background-color: #0f172a;
+      background-image: radial-gradient(#3b82f6 1px, transparent 1px);
+      background-size: 10px 10px;
+      border: 1px solid #1e3a8a;
+    }
+
+    .var-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      opacity: 0.7;
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       COLOR & TYPE GRID
+       ============================================================ */
+    .style-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-3xl);
+      
+      @media (min-width: 768px) {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .color-swatch {
+      flex-shrink: 0;
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      
+      @media (max-width: 480px) {
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    .swatch-blue {
+      background: var(--accent-blue);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+
+    .swatch-cyan {
+      background: var(--accent-cyan);
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+    }
+
+    .swatch-black {
+      background: var(--bg-color);
+      border: 1px solid var(--border);
+    }
+
+    .type-preview {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: var(--spacing-2xl);
+      border-radius: var(--radius-md);
+      
+      @media (max-width: 480px) {
+        padding: var(--spacing-lg);
+      }
+    }
+
+    .type-big {
+      font-size: 2.5rem;
+      margin-bottom: var(--spacing-lg);
+      font-weight: 700;
+      
+      @media (max-width: 480px) {
+        font-size: 2rem;
+      }
+    }
+
+    .type-sample {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-md);
+      
+      @media (max-width: 480px) {
+        font-size: 1.25rem;
+      }
+    }
+
+    /* ============================================================
+       OPTIONAL: ENHANCED SVG ANIMATION
+       Applied to primary logo only when prefers-reduced-motion is not set
+       ============================================================ */
+    @media (prefers-reduced-motion: no-preference) {
+      /* Subtle central node pulse animation */
+      @keyframes hex-pulse {
+        0%, 100% {
+          r: 6;
+          filter: drop-shadow(0 0 3px rgba(34, 211, 238, 0.5));
+        }
+        50% {
+          r: 7;
+          filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.8));
+        }
+      }
+      
+      /* Optional: Uncomment to enable pulse animation
+      .logo-box circle[cx="50"][cy="50"] {
+        animation: hex-pulse 3s ease-in-out infinite;
+      }
+      */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header class="header">
+      <span class="eyebrow">Brand Identity Presentation</span>
+      <h1>Shakya Labs</h1>
+      <p class="intro-text">
+        Fusing ancient symmetry with futuristic engineering. A "Digital Mandala" where sacred geometry meets system architecture.
+      </p>
+    </header>
+
+    <!-- MAIN SHOWCASE -->
+    <section class="showcase-grid">
+      
+      <!-- LOGO DISPLAY -->
+      <div class="logo-box">
+        <!-- SVG LOGO with improved robustness -->
+        <svg 
+          class="logo-svg" 
+          width="400" 
+          height="120" 
+          viewBox="0 0 400 120" 
+          fill="none" 
+          xmlns="http://www.w3.org/2000/svg"
+          role="img"
+          aria-label="Shakya Labs logo"
+        >
+          <defs>
+            <linearGradient id="mainGradient" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#22d3ee" />
+              <stop offset="100%" stop-color="#3b82f6" />
+            </linearGradient>
+          </defs>
+
+          <!-- Icon -->
+          <g transform="translate(10, 10)">
+            <!-- Main hex outline with vector-effect for consistent stroke on all scales -->
+            <path 
+              d="M50 0 L85 20 L85 40 M85 60 L85 80 L50 100 L15 80 L15 60 M15 40 L15 20 L50 0" 
+              stroke="url(#mainGradient)" 
+              stroke-width="3" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            />
+
+            <!-- Inner diamond geometry -->
+            <rect 
+              x="34" 
+              y="34" 
+              width="32" 
+              height="32" 
+              rx="4" 
+              transform="rotate(45 50 50)" 
+              stroke="white" 
+              stroke-width="2.5" 
+              fill="none" 
+              opacity="0.9"
+              vector-effect="non-scaling-stroke"
+            />
+
+            <!-- Central node with optional pulse animation -->
+            <circle cx="50" cy="50" r="6" fill="#22d3ee" />
+
+            <!-- Direction nodes -->
+            <circle cx="50" cy="15" r="2" fill="white" />
+            <circle cx="50" cy="85" r="2" fill="white" />
+            <circle cx="19" cy="50" r="2" fill="white" />
+            <circle cx="81" cy="50" r="2" fill="white" />
+
+            <!-- Speed lines for motion -->
+            <path 
+              d="M15 20 L25 25" 
+              stroke="#3b82f6" 
+              stroke-width="1.5" 
+              stroke-opacity="0.6"
+              vector-effect="non-scaling-stroke"
+            />
+            <path 
+              d="M85 80 L75 75" 
+              stroke="#3b82f6" 
+              stroke-width="1.5" 
+              stroke-opacity="0.6"
+              vector-effect="non-scaling-stroke"
+            />
+          </g>
+
+          <!-- Text -->
+          <g transform="translate(110, 68)">
+            <text 
+              font-family="'Space Grotesk', sans-serif" 
+              font-weight="700" 
+              font-size="48" 
+              fill="white" 
+              letter-spacing="0.05em"
+            >
+              SHAKYA
+            </text>
+            <text 
+              x="210" 
+              y="0" 
+              font-family="'Space Grotesk', sans-serif" 
+              font-weight="300" 
+              font-size="48" 
+              fill="#94a3b8" 
+              letter-spacing="0.1em"
+            >
+              LABS
+            </text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- EXPLANATION -->
+      <div class="concept-box">
+        <h3>The "Hex-Core" Concept</h3>
+        <p class="intro-text" style="font-size: 1rem;">
+          The icon draws from hexagonal structures found in nature (carbon, hives) and high-efficiency engineering. The central diamond represents the spark of wisdom, protected by an outer shell of technology.
+        </p>
+        <div class="concept-cards">
+          <div class="card">
+            <div class="card-icon">❖</div>
+            <div class="card-title">Labs &amp; Tech</div>
+            <div class="card-desc">Atomic nodes &amp; circuit paths.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">✦</div>
+            <div class="card-title">Timelessness</div>
+            <div class="card-desc">Sacred symmetry &amp; balance.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VARIATIONS -->
+    <h2 class="section-title">System Versatility</h2>
+    <section class="variations-grid">
+      
+      <!-- Black on White (Print) -->
+      <div class="var-box light">
+        <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+          <g>
+            <path 
+              d="M50 0 L85 20 L85 40 M85 60 L85 80 L50 100 L15 80 L15 60 M15 40 L15 20 L50 0" 
+              stroke="black" 
+              stroke-width="4" 
+              stroke-linecap="round" 
+              stroke-linejoin="round" 
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            />
+            <rect 
+              x="34" 
+              y="34" 
+              width="32" 
+              height="32" 
+              rx="4" 
+              transform="rotate(45 50 50)" 
+              stroke="black" 
+              stroke-width="3" 
+              fill="none"
+              vector-effect="non-scaling-stroke"
+            />
+            <circle cx="50" cy="50" r="6" fill="black" />
+          </g>
+        </svg>
+        <span class="var-label" style="color: black;">Ink / Print</span>
+      </div>
+
+      <!-- App Icon -->
+      <div class="var-box icon">
+        <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+          <path 
+            d="M50 0 L85 20 L85 80 L50 100 L15 80 L15 20 L50 0" 
+            stroke="white" 
+            stroke-width="6" 
+            fill="none"
+            vector-effect="non-scaling-stroke"
+          />
+          <circle cx="50" cy="50" r="10" fill="white" />
+        </svg>
+        <span class="var-label">App Icon</span>
+      </div>
+
+      <!-- Blueprint -->
+      <div class="var-box blueprint">
+        <svg width="80" height="80" viewBox="0 0 100 100" fill="none">
+          <path 
+            d="M50 0 L85 20 L85 40 M85 60 L85 80 L50 100 L15 80 L15 60 M15 40 L15 20 L50 0" 
+            stroke="#3b82f6" 
+            stroke-width="1" 
+            stroke-dasharray="4 2" 
+            fill="none"
+            vector-effect="non-scaling-stroke"
+          />
+          <rect 
+            x="34" 
+            y="34" 
+            width="32" 
+            height="32" 
+            rx="4" 
+            transform="rotate(45 50 50)" 
+            stroke="#22d3ee" 
+            stroke-width="1" 
+            fill="none"
+            vector-effect="non-scaling-stroke"
+          />
+          <line x1="50" y1="0" x2="50" y2="100" stroke="#3b82f6" stroke-width="0.5" opacity="0.3" />
+          <line x1="0" y1="50" x2="100" y2="50" stroke="#3b82f6" stroke-width="0.5" opacity="0.3" />
+        </svg>
+        <span class="var-label" style="color: #3b82f6;">Blueprint</span>
+      </div>
+    </section>
+
+    <!-- COLORS & TYPOGRAPHY -->
+    <section class="style-grid">
+      <div>
+        <h2 class="section-title">Color Palette</h2>
+        <div class="color-row">
+          <div class="color-swatch swatch-blue"></div>
+          <div>
+            <strong>Electric Blue</strong><br>
+            <span style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">#3B82F6</span>
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="color-swatch swatch-cyan"></div>
+          <div>
+            <strong>Cyber Cyan</strong><br>
+            <span style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">#22D3EE</span>
+          </div>
+        </div>
+        <div class="color-row">
+          <div class="color-swatch swatch-black"></div>
+          <div>
+            <strong>Void Black</strong><br>
+            <span style="color: #94a3b8; font-family: monospace; font-size: 0.9rem;">#030712</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="section-title">Typography</h2>
+        <div class="type-preview">
+          <div class="type-big brand-font">Space Grotesk</div>
+          <div class="type-sample brand-font" style="font-weight: 300;">Aa Bb Cc Dd Ee 123</div>
+          <div class="type-sample brand-font" style="font-weight: 700;">Aa Bb Cc Dd Ee 123</div>
+          <p style="margin-top: var(--spacing-lg); color: #94a3b8; font-size: 0.9rem; line-height: 1.6;">
+            A proportional sans-serif with a tech-forward personality. Designed for clarity at all scales.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
