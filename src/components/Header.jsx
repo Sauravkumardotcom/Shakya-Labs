@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import './Header.css';
 
-const Header = ({ isDarkTheme, toggleTheme, languageMode, onLanguageChange, onHomeClick }) => {
+const Header = ({ isDarkTheme, toggleTheme, languageMode, onLanguageChange, onHomeClick, onLogoClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className={`modern-navbar ${isDarkTheme ? 'dark' : 'light'}`}>
       <div className="navbar-container">
         {/* Logo */}
-        <div className="navbar-logo">
+        <div className="navbar-logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
           <div className="logo-icon">💕</div>
           <div className="logo-text">
             <span className="logo-brand">Shakya Labs</span>

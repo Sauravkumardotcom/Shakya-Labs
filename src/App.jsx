@@ -67,90 +67,7 @@ function Confetti() {
   return null
 }
 
-// Countdown Timer Component
-function CountdownTimer({ languageMode, isDark }) {
-  const [countdown, setCountdown] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-    isToday: false
-  })
 
-  useEffect(() => {
-    const calculateCountdown = () => {
-      const today = new Date()
-      const currentYear = today.getFullYear()
-      
-      // Check if today is Feb 2
-      const isToday = today.getMonth() === 1 && today.getDate() === 2
-      
-      // Set target to Feb 2
-      let targetDate = new Date(currentYear, 1, 2)
-      
-      // If Feb 2 has passed, target next year
-      if (today > targetDate && !isToday) {
-        targetDate = new Date(currentYear + 1, 1, 2)
-      }
-
-      const diff = targetDate - today
-      
-      if (diff <= 0) {
-        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, isToday: true })
-        return
-      }
-
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
-
-      setCountdown({ days, hours, minutes, seconds, isToday: false })
-    }
-
-    calculateCountdown()
-    const timer = setInterval(calculateCountdown, 1000)
-    return () => clearInterval(timer)
-  }, [])
-
-  const CountdownUnit = ({ value, label }) => (
-    <div className={`flex flex-col items-center ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>
-      <div className={`text-3xl md:text-4xl font-bold mb-2 ${isDark ? 'bg-gradient-to-br from-rose-400 to-pink-400 bg-clip-text text-transparent' : 'bg-gradient-to-br from-rose-500 to-pink-500 bg-clip-text text-transparent'}`}>
-        {String(value).padStart(2, '0')}
-      </div>
-      <div className="text-xs md:text-sm font-semibold uppercase tracking-wider">
-        {label}
-      </div>
-    </div>
-  )
-
-  return (
-    <div className={`w-full py-6 px-4 text-center ${isDark ? 'bg-rose-900/20 border-b border-rose-700/50' : 'bg-rose-50/50 border-b border-rose-200'}`}>
-      {countdown.isToday ? (
-        <div className={`text-2xl md:text-3xl font-bold animate-pulse ${isDark ? 'text-rose-300' : 'text-rose-600'}`}>
-          🎉 {languageMode === 'english' ? 'TODAY IS HER SPECIAL DAY!' : 'आज उसका खास दिन है! 🎉'}
-        </div>
-      ) : (
-        <div>
-          <p className={`text-sm md:text-base font-semibold mb-4 ${isDark ? 'text-rose-200' : 'text-rose-700'}`}>
-            {languageMode === 'english' 
-              ? '💫 A Very Special Day is Coming Soon 💫' 
-              : '💫 एक बहुत ही खास दिन आने वाला है 💫'}
-          </p>
-          <div className="flex justify-center gap-3 md:gap-6 flex-wrap">
-            <CountdownUnit value={countdown.days} label={languageMode === 'english' ? 'Days' : 'दिन'} />
-            <div className={`text-2xl md:text-3xl self-center ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>:</div>
-            <CountdownUnit value={countdown.hours} label={languageMode === 'english' ? 'Hours' : 'घंटे'} />
-            <div className={`text-2xl md:text-3xl self-center ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>:</div>
-            <CountdownUnit value={countdown.minutes} label={languageMode === 'english' ? 'Minutes' : 'मिनट'} />
-            <div className={`text-2xl md:text-3xl self-center ${isDark ? 'text-rose-400' : 'text-rose-500'}`}>:</div>
-            <CountdownUnit value={countdown.seconds} label={languageMode === 'english' ? 'Seconds' : 'सेकंड'} />
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 function App() {
   const [isDark, setIsDark] = useState(false)
@@ -166,6 +83,9 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showConfetti, setShowConfetti] = useState(false)
   const [languageMode, setLanguageMode] = useState('english')
+  const [navClickCount, setNavClickCount] = useState(0)
+  const [showPasscodePrompt, setShowPasscodePrompt] = useState(false)
+  const [passcodeInput, setPasscodeInput] = useState('')
 
   useEffect(() => {
     if (isDark) {
@@ -174,6 +94,31 @@ function App() {
       document.documentElement.classList.remove('dark')
     }
   }, [isDark])
+
+  // Easter egg function - 5 logo clicks to show passcode prompt
+  const handleLogoClick = () => {
+    setNavClickCount(prev => {
+      const newCount = prev + 1
+      if (newCount === 5) {
+        setShowPasscodePrompt(true)
+        return 0
+      }
+      return newCount
+    })
+  }
+
+  // Handle passcode submission
+  const handlePasscodeSubmit = (e) => {
+    e.preventDefault()
+    if (passcodeInput.toLowerCase() === 'shivi') {
+      setShowPasscodePrompt(false)
+      setPasscodeInput('')
+      setCurrentPage('birthday')
+    } else {
+      alert('Incorrect passcode. Try again!')
+      setPasscodeInput('')
+    }
+  }
 
   useEffect(() => {
     const style = document.createElement('style')
@@ -379,12 +324,8 @@ function App() {
           languageMode={languageMode}
           onLanguageChange={() => setLanguageMode(languageMode === 'english' ? 'hindi' : 'english')}
           onHomeClick={() => setCurrentPage('home')}
+          onLogoClick={handleLogoClick}
         />
-        
-        {/* Header with Love Dedication */}
-        <div className={`w-full py-2 text-center text-sm font-semibold ${isDark ? 'bg-rose-900/30 border-b border-rose-700/50 text-rose-300' : 'bg-rose-100/50 border-b border-rose-300 text-rose-700'}`}>
-          💝 This entire website is built with love and dedication to the woman who inspires everything 💝
-        </div>
 
         {/* Birthday Content */}
         <div className={`min-h-screen pt-40 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-rose-900/30 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-rose-50 via-white to-purple-50'}`}>
@@ -722,6 +663,44 @@ function App() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'dark bg-slate-950 text-slate-50' : 'bg-white text-gray-900'}`}>
+      {/* Passcode Modal */}
+      {showPasscodePrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`bg-white dark:bg-slate-900 rounded-lg p-8 max-w-md w-full shadow-2xl`}>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🔐 Secret Access</h2>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">Enter the passcode to unlock the special birthday page:</p>
+            <form onSubmit={handlePasscodeSubmit} className="space-y-4">
+              <input
+                type="password"
+                value={passcodeInput}
+                onChange={(e) => setPasscodeInput(e.target.value)}
+                placeholder="Enter passcode..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                autoFocus
+              />
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                >
+                  Unlock
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasscodePrompt(false)
+                    setPasscodeInput('')
+                    setNavClickCount(0)
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-900 rounded-lg font-semibold hover:bg-gray-400 transition-colors dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Modern Header/Navbar */}
       <Header
         isDarkTheme={isDark}
@@ -729,19 +708,11 @@ function App() {
         languageMode={languageMode}
         onLanguageChange={() => setLanguageMode(languageMode === 'english' ? 'hindi' : 'english')}
         onHomeClick={() => setCurrentPage('home')}
+        onLogoClick={handleLogoClick}
       />
-
-      {/* Header with Love Dedication */}
-      <div className={`w-full py-2 text-center text-sm font-semibold ${isDark ? 'bg-rose-900/30 border-b border-rose-700/50 text-rose-300' : 'bg-rose-100/50 border-b border-rose-300 text-rose-700'}`}>
-        💝 Built with love and dedication to inspire excellence 💝
-      </div>
 
       {/* Hero Section */}
       <section className={`pt-20 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950' : 'bg-gradient-to-b from-indigo-50 via-white to-white'}`}>
-        {/* Countdown Timer - At top of Hero */}
-        <div className="max-w-5xl mx-auto mb-12">
-          <CountdownTimer languageMode={languageMode} isDark={isDark} />
-        </div>
 
         <div className="max-w-5xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -1061,19 +1032,6 @@ function App() {
                 <li><a href="#" className="hover:text-indigo-400 transition-colors transform hover:translate-x-1 inline-block">→ GitHub</a></li>
                 <li><a href="#" className="hover:text-indigo-400 transition-colors transform hover:translate-x-1 inline-block">→ Email</a></li>
               </ul>
-            </div>
-
-            <div>
-              <h4 className="text-white font-semibold mb-4">Special 💝</h4>
-              <button
-                onClick={() => setCurrentPage('birthday')}
-                className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold hover:from-pink-600 hover:to-rose-600 transition-all transform hover:scale-105 shadow-lg hover:shadow-xl text-sm"
-              >
-                🎉 Birthday Wish
-              </button>
-              <p className="text-gray-500 text-xs mt-3 italic text-center">
-                For that special girl 💕
-              </p>
             </div>
           </div>
 
