@@ -304,7 +304,7 @@ function App() {
         longDistanceText: "Without ever meeting in person, we built a relationship based on trust, vulnerability, and genuine love. We were miles apart, but our souls were growing closer with every conversation. We learned each other in the most intimate way possible—through words, through shared dreams, through the vulnerability of being completely open with someone. Those were the days that proved love doesn't need proximity; it needs commitment and authenticity.",
         
         loveBlossomTitle: "The First Touch - November 29, 2025",
-        loveBlossomText: "Then came the day we had dreamed about—November 29, 2025. When we finally met in person after all those months of waiting. My heart was racing as I saw you. We walked together on the road, talking, laughing, finally feeling each other's presence. And then, in that magical moment under the moonlight in the field, you held my hand for the first time, and we kissed. That kiss was the culmination of all our waiting, all our hope, all our love. It was perfect. It was ours.",
+        loveBlossomText: "Then came the day we had dreamed about—November 29, 2025. When we finally met in person after all those months of waiting. My heart was racing as I saw you. We walked together, talking, laughing, finally feeling each other's presence. And then, under the moonlight, you held my hand for the first time, and we kissed. That kiss was the culmination of all our waiting, all our hope, all our love. It was perfect. It was ours.",
         
         dinnerNightTitle: "Our First Official Date - November 30, 2025",
         dinnerNightText: "The next evening, we met again at a beautiful restaurant. We had dinner together, talked for hours—really talked, sharing dreams and promises. That night felt like we were finally living the reality we had only imagined. Every moment was precious, every word was meaningful. We weren't just two people in love; we were two souls finally united after so much waiting.",
@@ -348,7 +348,7 @@ function App() {
         dinnerNightText: "अगली शाम, हम एक खूबसूरत रेस्तरां में फिर से मिले। हमने एक साथ खाना खाया, घंटों बातचीत की—वाकई बातचीत, सपने और वादे साझा किए। वह रात ऐसी महसूस हुई जैसे हम अंत में उस वास्तविकता को जी रहे हैं जिसकी हमने केवल कल्पना की थी। हर पल कीमती था, हर शब्द अर्थपूर्ण था। हम सिर्फ दो प्रेमी नहीं थे; हम दो आत्माएं थीं जो अंत में एक साथ मिली थीं।",
         
         specialDayTitle: "और अब - लंबी दूरी के साथ प्यार",
-        specialDayText: "हम फिर से लंबी दूरी में हैं, लेकिन सब कुछ बदल गया है। हमने एक दूसरे को छुआ है, हमने चुंबन किया है, हमने एक दूसरे को पकड़ा है। अब जब हम अगली मुलाकात के लिए इंतजार करते हैं, तो यह सिर्फ उम्मीद और कल्पना नहीं है—यह यादें और निश्चितता है। हम जानते हैं कि हमारे पास जो है वह सच है। हम जानते हैं कि हम कोई भी दूरी सहन कर सकते हैं क्योंकि हमने पहले से ही सबसे मुश्किल हिस्सा सहन कर लिया है—यह जाने बिना इंतजार करना कि दूसरा व्यक्ति भी ऐसा ही महसूस करता है। जन्मदिन मुबारक उस महिला को जिसने इंतजार किया, जिसने विश्वास किया, जिसने मुझसे स्क्रीन और दूरी के माध्यम से प्यार किया। तुम दुनिया की सारी खुशी की हकदार हो।",
+        specialDayText: "हम फिर से लंबी दूरी में हैं, लेकिन सब कुछ बदल गया है। हमने एक दूसरे को छुआ है, हमने चुंबन किया है, हमने एक दूसरे को पकड़ा है। अब जब हम अगली मुलाकात के लिए इंतजार करते हैं, तो यह सिर्फ उम्मीद और कल्पना नहीं है—यह यादें और निश्चितता है। हम जानते हैं कि हमारे पास जो है वह सच है। हम जानते हैं कि हम कोई भी दूरी सहन कर सकते हैं क्योंकि हमने पहले से ही सबसे मुश्किल हिस्सा सहन कर लिया है। जन्मदिन मुबारक उस महिला को जिसने विश्वास किया और प्यार किया।",
         
         specialMessage: "तुम मेरा पसंदीदा इंसान हो, मेरी सबसे बड़ी खोज हो, और मेरा सबसे गहरा प्यार हो। 2022 में पहली यात्रा से लेकर हमारी लंबी दूरी की यात्रा तक, उस जादुई चाँदनी रात तक, और अब हर पल हम साझा करते हैं, तुम्हारे साथ हर दिन एक कीमती तोहफा है। हर यादें हमेशा के लिए मेरे दिल में सजी हैं। तुम्हें जन्मदिन की बहुत बहुत मुबारकबाद, तुम मेरी जिंदगी को पूरी और खूबसूरत बनाती हो। मैं तुमसे अपने शब्दों से ज्यादा प्यार करता हूँ। हमेशा और हमेशा के लिए। 💕",
         
@@ -389,6 +389,79 @@ function App() {
         {/* Birthday Content */}
         <div className={`min-h-screen pt-40 pb-32 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDark ? 'bg-gradient-to-br from-rose-900/30 via-slate-900 to-slate-950' : 'bg-gradient-to-br from-rose-50 via-white to-purple-50'}`}>
           <div className="max-w-5xl mx-auto">
+            {/* Canvas Love Animation */}
+            <canvas 
+              id="loveCanvas"
+              className={`w-full h-64 rounded-3xl mb-12 block mx-auto ${isDark ? 'bg-rose-900/20 border border-rose-700/50' : 'bg-rose-100/40 border border-rose-300/50'}`}
+              ref={(canvas) => {
+                if (canvas && !canvas.loveAnimationInitialized) {
+                  canvas.loveAnimationInitialized = true
+                  const ctx = canvas.getContext('2d')
+                  let particles = []
+                  
+                  function resizeCanvas() {
+                    const rect = canvas.getBoundingClientRect()
+                    canvas.width = rect.width * window.devicePixelRatio
+                    canvas.height = rect.height * window.devicePixelRatio
+                    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+                  }
+                  resizeCanvas()
+                  
+                  class Particle {
+                    constructor(x, y) {
+                      this.x = x
+                      this.y = y
+                      this.vx = (Math.random() - 0.5) * 3
+                      this.vy = (Math.random() - 0.5) * 3 - 0.5
+                      this.life = 1
+                      this.decay = Math.random() * 0.01 + 0.003
+                      this.type = Math.random() > 0.5 ? 'heart' : 'spark'
+                      this.rotation = Math.random() * Math.PI * 2
+                    }
+                    update() {
+                      this.x += this.vx
+                      this.y += this.vy
+                      this.vy += 0.1
+                      this.life -= this.decay
+                      this.rotation += 0.05
+                    }
+                    draw(ctx) {
+                      if (this.type === 'heart') {
+                        ctx.save()
+                        ctx.globalAlpha = this.life
+                        ctx.font = `${15 * this.life}px Arial`
+                        ctx.textAlign = 'center'
+                        ctx.fillText('❤️', this.x, this.y)
+                        ctx.restore()
+                      } else {
+                        ctx.save()
+                        ctx.globalAlpha = this.life * 0.8
+                        ctx.fillStyle = '#ffd700'
+                        ctx.beginPath()
+                        ctx.arc(this.x, this.y, 2 * this.life, 0, Math.PI * 2)
+                        ctx.fill()
+                        ctx.restore()
+                      }
+                    }
+                  }
+                  
+                  function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height)
+                    particles = particles.filter(p => p.life > 0)
+                    particles.forEach(p => {
+                      p.update()
+                      p.draw(ctx)
+                    })
+                    if (Math.random() > 0.7) {
+                      particles.push(new Particle(canvas.width / 2 + (Math.random() - 0.5) * 40, canvas.height / 2 + (Math.random() - 0.5) * 40))
+                    }
+                    requestAnimationFrame(animate)
+                  }
+                  animate()
+                }
+              }}
+            />
+
             {/* Animated Floating Hearts */}
             <div className="mb-12 flex justify-center gap-4 flex-wrap">
               {['💖', '✨', '🌹', '💕', '🎀', '💝', '🌹', '✨'].map((emoji, i) => (
