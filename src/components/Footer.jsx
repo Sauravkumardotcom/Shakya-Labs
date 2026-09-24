@@ -1,6 +1,7 @@
 import React from 'react';
+import ShakyaLabsLogo from './ShakyaLabsLogo';
 
-const Footer = () => {
+const Footer = ({ settings }) => {
   const quickLinks = [
     { name: 'About', href: '#about' },
     { name: 'Products', href: '#products' },
@@ -10,10 +11,10 @@ const Footer = () => {
   ];
 
   const socialLinks = [
-    { name: 'LinkedIn', href: '#', icon: '💼' },
-    { name: 'GitHub', href: '#', icon: '💻' },
-    { name: 'Twitter', href: '#', icon: '🐦' },
-    { name: 'Email', href: 'mailto:contact@shakyalabs.com', icon: '📧' }
+    { name: 'LinkedIn', href: settings?.socialLinks?.linkedin || '#', icon: '💼' },
+    { name: 'GitHub', href: settings?.socialLinks?.github || '#', icon: '💻' },
+    { name: 'Twitter', href: settings?.socialLinks?.twitter || '#', icon: '🐦' },
+    { name: 'Email', href: `mailto:${settings?.email || 'contact@shakyalabs.com'}`, icon: '📧' }
   ];
 
   return (
@@ -22,18 +23,9 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-shakya-cyan to-shakya-blue flex items-center justify-center">
-                <svg viewBox="0 0 40 40" className="w-6 h-6 text-white" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 4L4 32h32L20 4Z" stroke="currentColor" strokeWidth="2" fill="none"/>
-                  <path d="M20 4L12 18h16L20 4Z" stroke="currentColor" strokeWidth="2" fill="currentColor" opacity="0.8"/>
-                </svg>
-              </div>
-              <div>
-                <div className="text-white font-bold text-lg font-heading">Shakya Labs</div>
-                <div className="text-shakya-cyan text-xs font-medium">Built with Precision</div>
-              </div>
-            </div>
+            <a href="#" className="inline-flex mb-4" aria-label="Shakya Labs home">
+              <ShakyaLabsLogo variant="footer" />
+            </a>
             <p className="text-shakya-text-secondary text-sm max-w-md">
               Building scalable software solutions with ancient wisdom and modern engineering. Transforming ideas into impact through innovative technology.
             </p>
@@ -80,7 +72,7 @@ const Footer = () => {
         <div className="border-t border-shakya-border pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-shakya-text-secondary text-sm">
-              © {new Date().getFullYear()} Shakya Labs — Built by Saurav Kumar Shakya
+              {settings?.copyright || `© ${new Date().getFullYear()} Shakya Labs — Built by Saurav Kumar Shakya`}
             </p>
             <p className="text-shakya-text-secondary text-sm">
               Built with React, Tailwind CSS & ❤️

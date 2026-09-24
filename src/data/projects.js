@@ -1,6 +1,14 @@
 export const projects = [
   {
     id: 1,
+    title: "Personal Portfolio",
+    description: "A personal portfolio website that showcases my profile, projects, services, and digital presence for my personal brand.",
+    techStack: ["React", "Vite", "Tailwind CSS", "Node.js", "Responsive Design"],
+    category: "Portfolio Website",
+    url: "https://me.shakyalabs.com"
+  },
+  {
+    id: 2,
     title: "College Management System",
     description: "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
     techStack: ["Java", "Spring Boot", "MySQL", "React", "REST API"],

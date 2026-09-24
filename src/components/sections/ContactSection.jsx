@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Section from '../ui/Section';
 import Button from '../ui/Button';
 
-const ContactSection = () => {
+const ContactSection = ({ settings }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -85,6 +85,7 @@ const ContactSection = () => {
           <p className="text-xl text-shakya-text-secondary">
             Have a project in mind? We'd love to hear from you and discuss how we can help bring your vision to life.
           </p>
+          {settings?.email && <p className="text-sm text-shakya-text-secondary mt-3">{settings.email}{settings.phone ? ` · ${settings.phone}` : ''}</p>}
         </div>
         
         <div className="bg-shakya-bg-card rounded-2xl p-8 md:p-12 border border-shakya-border shadow-card">

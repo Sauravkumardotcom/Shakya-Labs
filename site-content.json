@@ -1,0 +1,742 @@
+{
+  "settings": {
+    "companyName": "Shakya Labs",
+    "tagline": "Ancient Wisdom × Modern Engineering",
+    "email": "Souravshakya951@gmail.com",
+    "phone": "+91 8974158111",
+    "address": "India",
+    "copyright": "© 2026 Shakya Labs. All rights reserved.",
+    "socialLinks": {
+      "github": "",
+      "linkedin": "",
+      "twitter": ""
+    },
+    "socialLinks.github": "",
+    "socialLinks.linkedin": "",
+    "socialLinks.twitter": ""
+  },
+  "hero": {
+    "badge": "Ancient Wisdom × Modern Engineering",
+    "heading": "Engineering Digital Systems with Clarity and Purpose",
+    "description": "Shakya Labs builds products, platforms, and scalable software solutions that transform complex business challenges into elegant systems.",
+    "primaryButtonText": "Explore Products",
+    "primaryButtonUrl": "#products",
+    "secondaryButtonText": "Work With Us",
+    "secondaryButtonUrl": "#contact",
+    "published": true,
+    "status": "published",
+    "createdAt": "2026-09-23T15:33:58.835Z",
+    "updatedAt": "2026-09-23T15:33:58.835Z"
+  },
+  "stats": [
+    {
+      "id": "1",
+      "value": "50+",
+      "label": "Projects Delivered",
+      "icon": "⚙️",
+      "active": true
+    },
+    {
+      "id": "2",
+      "value": "100%",
+      "label": "Client Satisfaction",
+      "icon": "✅",
+      "active": true
+    },
+    {
+      "id": "3",
+      "value": "8+",
+      "label": "Years Experience",
+      "icon": "🚀",
+      "active": true
+    }
+  ],
+  "about": {
+    "title": "About Shakya Labs Shivi",
+    "description": "Founded by Saurav Kumar Shakya, Shakya Labs is a technology innovation lab dedicated to building exceptional software systems that drive business success.",
+    "supportingText": "We build digital platforms, software products, automation systems, and scalable experiences for modern businesses.",
+    "published": true,
+    "heading": "Shivi",
+    "image": "",
+    "ctaText": "",
+    "ctaUrl": "",
+    "status": "published",
+    "createdAt": "2026-09-23T15:33:58.835Z",
+    "updatedAt": "2026-09-23T15:33:58.835Z"
+  },
+  "services": [
+    {
+      "id": "svc-1",
+      "title": "Custom Web Application Development",
+      "description": "Bespoke web applications engineered from the ground up to fit your unique business requirements and workflows perfectly.",
+      "icon": "⚙️",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "svc-2",
+      "title": "Backend System Design",
+      "description": "Robust, scalable backend architectures with performant APIs designed for enterprise-grade reliability and growth.",
+      "icon": "🔌",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "svc-3",
+      "title": "Database Architecture",
+      "description": "Strategic database design and optimization for data integrity, performance, and scalability at any volume.",
+      "icon": "💾",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "svc-4",
+      "title": "UI/UX Design",
+      "description": "User-centered interface design that balances aesthetics with functionality for exceptional user experiences.",
+      "icon": "🎨",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "svc-5",
+      "title": "Automation Development",
+      "description": "Custom automation solutions that streamline workflows, reduce manual effort, and increase operational efficiency.",
+      "icon": "🤖",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "svc-6",
+      "title": "Software Consulting",
+      "description": "Expert guidance on technology decisions, architecture reviews, and modernization strategies for your tech stack.",
+      "icon": "💡",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "title": "College Management System",
+      "description": "A multi-dashboard platform for Students, Faculty, Admin, and Parents",
+      "features": [
+        "Attendance tracking and management",
+        "Examination and grading system",
+        "Internal messaging platform"
+      ],
+      "techStack": [
+        "Java",
+        "MySQL",
+        "Spring Boot",
+        "React"
+      ],
+      "icon": "🎓",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "prod-2",
+      "title": "Movie Space Platform",
+      "description": "A movie discovery platform with modern UI and robust backend",
+      "features": [
+        "Comprehensive backend API",
+        "User authentication and authorization",
+        "Modern, responsive UI design"
+      ],
+      "techStack": [
+        "React",
+        "Node.js",
+        "MongoDB",
+        "Express"
+      ],
+      "icon": "🎬",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "prod-3",
+      "title": "AI Chatbot System",
+      "description": "Intelligent chatbot platform with automation workflows",
+      "features": [
+        "Secure login authentication",
+        "MySQL database integration",
+        "Automated response workflows"
+      ],
+      "techStack": [
+        "Python",
+        "MySQL",
+        "NLP",
+        "Flask"
+      ],
+      "icon": "🤖",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "College Management System",
+      "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+      "techStack": [
+        "Java",
+        "Spring Boot",
+        "MySQL",
+        "React",
+        "REST API"
+      ],
+      "category": "Enterprise Software",
+      "url": "https://example.com",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:42:52.481Z",
+      "updatedBy": "admin@shakyalabs.com",
+      "publishedAt": "2026-09-23T15:42:52.481Z",
+      "publishedBy": "admin@shakyalabs.com"
+    },
+    {
+      "id": "proj-2",
+      "title": "Event Management System",
+      "description": "End-to-end event planning and management platform with attendee tracking and automated communications.",
+      "techStack": [
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "Vue.js"
+      ],
+      "category": "Web Application",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "proj-3",
+      "title": "Pilgrim Tour Website",
+      "description": "Modern tourism website with booking system, itinerary management, and payment integration.",
+      "techStack": [
+        "React",
+        "Tailwind CSS",
+        "Node.js",
+        "Stripe"
+      ],
+      "category": "E-Commerce",
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "t-1",
+      "quote": "Working with Shakya Labs transformed our operations...",
+      "name": "Dr. Rajesh Kumar",
+      "role": "Academic Director",
+      "rating": 5,
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    },
+    {
+      "id": "t-2",
+      "quote": "The technical expertise and clear communication...",
+      "name": "Priya Sharma",
+      "role": "Product Manager",
+      "rating": 5,
+      "published": true,
+      "status": "published",
+      "createdAt": "2026-09-23T15:33:58.835Z",
+      "updatedAt": "2026-09-23T15:33:58.835Z"
+    }
+  ],
+  "founder": {
+    "name": "Saurav Kumar Shakya",
+    "title": "Founder & Software Developer",
+    "bio": "Saurav focuses on building scalable systems, product platforms, and real-world applications that solve meaningful problems.",
+    "skills": [
+      "Java",
+      "Web Development",
+      "Google Apps Script",
+      "System Design",
+      "Backend Development",
+      "UI/UX Thinking"
+    ],
+    "certifications": [
+      "Java Certification (NSDC)",
+      "Communication & Customer Relationship Certification (Teleperformance)"
+    ],
+    "published": true,
+    "status": "published",
+    "createdAt": "2026-09-23T15:33:58.835Z",
+    "updatedAt": "2026-09-23T15:33:58.835Z"
+  },
+  "seo": {
+    "siteTitle": "Shakya Labs",
+    "metaDescription": "Shakya Labs builds products, platforms, and scalable software solutions.",
+    "keywords": "Shakya Labs, software development, backend engineering",
+    "canonicalUrl": "https://www.shakyalabs.com/",
+    "ogTitle": "Shakya Labs",
+    "ogDescription": "Ancient Wisdom × Modern Engineering",
+    "ogImage": "/branding/shakyalabswithprofilelogo.png",
+    "pages": {
+      "home": {
+        "metaTitle": "Shakya Labs | Engineering Digital Systems",
+        "metaDescription": "Engineering digital systems with clarity and purpose.",
+        "canonicalUrl": "https://www.shakyalabs.com/"
+      }
+    }
+  },
+  "certifications": [],
+  "media": [],
+  "versions": [
+    {
+      "versionId": "b46b3a2c-ee79-4c49-8308-8db15144cdd5",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": false,
+        "status": "draft",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:42:52.463Z",
+        "updatedBy": "admin@shakyalabs.com",
+        "publishedAt": "2026-09-23T15:33:59.075Z",
+        "publishedBy": "admin@shakyalabs.com"
+      },
+      "createdAt": "2026-09-23T15:42:52.480Z",
+      "createdBy": "admin@shakyalabs.com"
+    },
+    {
+      "versionId": "b0d0431a-0e0e-45cf-841f-9fff11ce197b",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": true,
+        "status": "published",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:33:59.225Z",
+        "updatedBy": "admin@shakyalabs.com",
+        "publishedAt": "2026-09-23T15:33:59.225Z",
+        "publishedBy": "admin@shakyalabs.com"
+      },
+      "createdAt": "2026-09-23T15:42:52.461Z",
+      "createdBy": "admin@shakyalabs.com"
+    },
+    {
+      "versionId": "577689b7-f059-4333-a4da-5ee4fa55e087",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": false,
+        "status": "draft",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:33:59.138Z",
+        "updatedBy": "admin@shakyalabs.com",
+        "publishedAt": "2026-09-23T15:33:59.075Z",
+        "publishedBy": "admin@shakyalabs.com"
+      },
+      "createdAt": "2026-09-23T15:33:59.222Z",
+      "createdBy": "admin@shakyalabs.com"
+    },
+    {
+      "versionId": "bbe70389-b245-4584-8b79-a7ee5a7e3ef8",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": true,
+        "status": "published",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:33:59.075Z",
+        "updatedBy": "admin@shakyalabs.com",
+        "publishedAt": "2026-09-23T15:33:59.075Z",
+        "publishedBy": "admin@shakyalabs.com"
+      },
+      "createdAt": "2026-09-23T15:33:59.135Z",
+      "createdBy": "admin@shakyalabs.com"
+    },
+    {
+      "versionId": "7fac1f51-f056-4ca3-a3ef-2dc46a51ea0f",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": false,
+        "status": "review",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:33:59.026Z",
+        "updatedBy": "admin@shakyalabs.com"
+      },
+      "createdAt": "2026-09-23T15:33:59.074Z",
+      "createdBy": "admin@shakyalabs.com"
+    },
+    {
+      "versionId": "83cbf40c-b364-4b3c-981c-2e314c273d88",
+      "contentId": "proj-1",
+      "contentType": "projects",
+      "data": {
+        "id": "proj-1",
+        "title": "College Management System",
+        "description": "Comprehensive platform managing students, faculty, courses, and administration with real-time analytics.",
+        "techStack": [
+          "Java",
+          "Spring Boot",
+          "MySQL",
+          "React",
+          "REST API"
+        ],
+        "category": "Enterprise Software",
+        "url": "https://example.com",
+        "published": true,
+        "status": "published",
+        "createdAt": "2026-09-23T15:33:58.835Z",
+        "updatedAt": "2026-09-23T15:33:58.835Z"
+      },
+      "createdAt": "2026-09-23T15:33:59.025Z",
+      "createdBy": "admin@shakyalabs.com"
+    }
+  ],
+  "messages": [],
+  "admins": [],
+  "activity": [
+    {
+      "id": "4c8a09ae-4e37-4e36-a94a-4228148893c7",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-24T05:01:55.657Z"
+    },
+    {
+      "id": "9cddd975-f8ec-4800-a4eb-2738cb516677",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-24T04:50:38.497Z"
+    },
+    {
+      "id": "cef4d24f-8f66-49d4-a7f9-ea63ecc545ad",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-24T04:28:15.599Z"
+    },
+    {
+      "id": "bc7ebb4a-64e0-4186-bb37-f4aee44cb667",
+      "user": "admin@shakyalabs.com",
+      "action": "deleted",
+      "entity": "user",
+      "metadata": {
+        "id": "d9471520-254b-4b1a-8922-4f0cf468b9ab"
+      },
+      "createdAt": "2026-09-23T15:42:53.454Z"
+    },
+    {
+      "id": "5adebf52-23d8-4704-960f-ab6d9aed8095",
+      "user": "viewer-1790178172@example.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:42:53.377Z"
+    },
+    {
+      "id": "ed71cb23-fdcb-4c5d-8f5b-5c4946c576ea",
+      "user": "admin@shakyalabs.com",
+      "action": "created",
+      "entity": "user",
+      "metadata": {
+        "id": "d9471520-254b-4b1a-8922-4f0cf468b9ab"
+      },
+      "createdAt": "2026-09-23T15:42:52.863Z"
+    },
+    {
+      "id": "85f1e0ca-1daa-4e1a-a3ac-521773770422",
+      "user": "admin@shakyalabs.com",
+      "action": "publish",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1"
+      },
+      "createdAt": "2026-09-23T15:42:52.482Z"
+    },
+    {
+      "id": "05106f0f-8b79-4e5c-9e57-62082823c92a",
+      "user": "admin@shakyalabs.com",
+      "action": "restored",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1",
+        "versionId": "577689b7-f059-4333-a4da-5ee4fa55e087"
+      },
+      "createdAt": "2026-09-23T15:42:52.465Z"
+    },
+    {
+      "id": "a4044833-4fe5-4466-ae4d-887cb8302879",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:42:52.324Z"
+    },
+    {
+      "id": "b4adecd6-bdcf-41db-bb44-2aba1828de42",
+      "user": "admin@shakyalabs.com",
+      "action": "deleted",
+      "entity": "user",
+      "metadata": {
+        "id": "2364c9eb-f830-4358-87a7-0a519aa3a91c"
+      },
+      "createdAt": "2026-09-23T15:42:32.713Z"
+    },
+    {
+      "id": "e47bec7a-4f88-475d-ba1c-61622e2ef688",
+      "user": "admin@shakyalabs.com",
+      "action": "created",
+      "entity": "user",
+      "metadata": {
+        "id": "2364c9eb-f830-4358-87a7-0a519aa3a91c"
+      },
+      "createdAt": "2026-09-23T15:42:32.660Z"
+    },
+    {
+      "id": "3e74a055-90f9-4362-bf5b-4f3b66fc11db",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "seo",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:42:32.187Z"
+    },
+    {
+      "id": "82fc0bbe-207c-4322-836a-a6eab06c6d82",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:42:32.057Z"
+    },
+    {
+      "id": "e47e8a81-69fd-458f-b6b3-4270b5a42440",
+      "user": "admin@shakyalabs.com",
+      "action": "publish",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1"
+      },
+      "createdAt": "2026-09-23T15:33:59.226Z"
+    },
+    {
+      "id": "51094b8a-fd9b-4705-8b07-f3759d908569",
+      "user": "admin@shakyalabs.com",
+      "action": "unpublish",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1"
+      },
+      "createdAt": "2026-09-23T15:33:59.140Z"
+    },
+    {
+      "id": "6f69a786-0d93-4c8d-8899-13eb8fd9d3f4",
+      "user": "admin@shakyalabs.com",
+      "action": "publish",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1"
+      },
+      "createdAt": "2026-09-23T15:33:59.076Z"
+    },
+    {
+      "id": "e29d9534-910d-437f-84d5-39e2efb6d09e",
+      "user": "admin@shakyalabs.com",
+      "action": "review",
+      "entity": "projects",
+      "metadata": {
+        "id": "proj-1"
+      },
+      "createdAt": "2026-09-23T15:33:59.027Z"
+    },
+    {
+      "id": "ccaf3a4b-8dd0-4cf7-80d6-4ea883baaf3d",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:33:58.947Z"
+    },
+    {
+      "id": "dd46b41d-88bc-4039-bcff-d2024549f43c",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:13:01.877Z"
+    },
+    {
+      "id": "85881fd6-ed89-4563-b3a6-8c0a9fface00",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "about",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:05:13.878Z"
+    },
+    {
+      "id": "bd2ef30b-417f-4c06-b3ae-79a7ca7e4029",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "about",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:04:36.470Z"
+    },
+    {
+      "id": "40f98aab-cb65-4579-9aa2-867cf0bc9e6a",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "settings",
+      "metadata": {},
+      "createdAt": "2026-09-23T15:03:18.830Z"
+    },
+    {
+      "id": "11fc0d65-b9f3-4d60-ac23-bd1bfe05112e",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T14:41:23.142Z"
+    },
+    {
+      "id": "364c06e2-7372-4633-838f-67bd19b91d94",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T14:36:33.944Z"
+    },
+    {
+      "id": "a4382b18-f0d2-42dc-8733-837cbe01158b",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T13:47:59.825Z"
+    },
+    {
+      "id": "42054b8a-6f97-445a-bcf7-f2cc20e9579d",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "about",
+      "metadata": {},
+      "createdAt": "2026-09-23T13:41:41.319Z"
+    },
+    {
+      "id": "aa55fd7b-f3fa-4a49-955f-4be7d118f275",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T13:41:41.181Z"
+    },
+    {
+      "id": "611b24e8-a9a8-404a-96a1-4bf7b17d9764",
+      "user": "admin@shakyalabs.com",
+      "action": "login",
+      "entity": "admin",
+      "metadata": {},
+      "createdAt": "2026-09-23T13:40:25.532Z"
+    },
+    {
+      "id": "0eefc1c0-159f-4ecc-9ab1-5dd46064219e",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "hero",
+      "metadata": {},
+      "createdAt": "2026-09-23T09:52:15.943Z"
+    },
+    {
+      "id": "ab1ae3fe-4a7b-4d4b-83e6-8b26e5ee5767",
+      "user": "admin@shakyalabs.com",
+      "action": "updated",
+      "entity": "hero",
+      "metadata": {},
+      "createdAt": "2026-09-23T09:52:15.877Z"
+    }
+  ]
+}

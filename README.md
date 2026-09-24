@@ -41,28 +41,37 @@ npm install
 
 3. Create environment variables
 ```bash
-cp .env.example .env.local
-# Edit .env.local with your Gmail credentials
+cp .env.example .env
+# Edit .env with your credentials
 ```
 
-4. Start development server
+4. Start the frontend development server
 ```bash
 npm run dev
 ```
 
 5. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-## Environment Variables
-
-Create a `.env.local` file based on `.env.example`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-password
+6. In a second terminal, start the JSON-backed CMS API
+```bash
+npm run server
 ```
 
-**Note**: Never commit `.env.local` to version control
+## Environment Variables
+
+Create a `.env` file based on `.env.example`:
+
+```env
+PORT=5000
+VITE_API_URL=
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+ADMIN_EMAIL=admin@shakyalabs.com
+ADMIN_PASSWORD=choose-a-strong-password
+JWT_SECRET=use-a-long-random-secret
+```
+
+`ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `JWT_SECRET` are required when initializing the production store. Never commit `.env` or other local environment files.
 
 ## Gmail Setup
 
@@ -99,6 +108,17 @@ shakya-labs/
 └── package.json          # Project dependencies
 
 ```
+
+## Admin CMS
+
+Open `/admin/login` after starting the frontend and API. The CMS uses the JSON file at `site-content.json` for local persistence and provides authenticated content management for the public website, including:
+
+- Role-based access for Viewer, Editor, Admin, and Super Admin
+- Draft, review, published workflow with version history and restore
+- Dashboard metrics, collection pagination, messages, activity logs, users, media, and SEO
+- Draft preview using the public website composition
+
+The API enforces authorization server-side. Passwords are hashed and are never returned by admin API responses. Use `npm run build` to validate the production frontend bundle.
 
 ## Features
 
