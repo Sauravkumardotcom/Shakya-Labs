@@ -13,6 +13,7 @@ import FounderSection from './components/sections/FounderSection';
 import ContactSection from './components/sections/ContactSection';
 import AdminApp from './admin/AdminApp';
 import ShakyaLabsLogo from './components/ShakyaLabsLogo';
+import JobsPortal from './jobs/JobsPortal';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
@@ -27,15 +28,8 @@ function PublicSite() {
         if (data.seo) {
           const homeSeo = data.seo.pages?.home || data.seo;
           document.title = homeSeo.metaTitle || data.seo.siteTitle || document.title;
-          const setMeta = (selector, attribute, value) => { if (!value) return; let element = document.querySelector(selector); if (!element) { element = document.createElement('meta'); element.setAttribute(attribute, selector.includes('property=') ? selector.split('"')[1] : selector.split('"')[1]); document.head.appendChild(element); } element.setAttribute('content', value); };
-          setMeta('meta[name="description"]', 'name', homeSeo.metaDescription || data.seo.metaDescription);
-          setMeta('meta[property="og:title"]', 'property', homeSeo.ogTitle || data.seo.ogTitle || homeSeo.metaTitle);
-          setMeta('meta[property="og:description"]', 'property', homeSeo.ogDescription || data.seo.ogDescription || homeSeo.metaDescription);
-          setMeta('meta[property="og:image"]', 'property', homeSeo.ogImage || data.seo.ogImage);
-          setMeta('meta[name="twitter:card"]', 'name', 'summary_large_image');
-          setMeta('meta[name="twitter:title"]', 'name', homeSeo.twitterTitle || homeSeo.ogTitle || data.seo.ogTitle || homeSeo.metaTitle);
-          setMeta('meta[name="twitter:description"]', 'name', homeSeo.twitterDescription || homeSeo.ogDescription || data.seo.ogDescription || homeSeo.metaDescription);
-          setMeta('meta[name="twitter:image"]', 'name', homeSeo.twitterImage || homeSeo.ogImage || data.seo.ogImage);
+          const description = document.querySelector('meta[name="description"]');
+          if (description && homeSeo.metaDescription) description.setAttribute('content', homeSeo.metaDescription);
           if (homeSeo.canonicalUrl) {
             let canonical = document.querySelector('link[rel="canonical"]');
             if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
@@ -72,6 +66,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<PublicSite />} />
+      <Route path="/jobs/*" element={<JobsPortal />} />
       <Route path="/admin/*" element={<AdminApp />} />
       <Route path="*" element={<PublicSite />} />
     </Routes>

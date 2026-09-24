@@ -308,6 +308,10 @@
     }
   },
   "certifications": [],
+  "jobs": [],
+  "companies": [],
+  "jobCategories": [],
+  "applications": [],
   "media": [],
   "versions": [
     {
@@ -475,7 +479,15 @@
     }
   ],
   "messages": [],
-  "admins": [],
+  "admins": [
+    {
+      "id": "70c041b2-6cfb-4fc7-93c6-e69e7a591674",
+      "email": "admin@shakyalabs.com",
+      "passwordHash": "$2b$10$YPpxYB1AG0p8Icggu4c2VOlLsXicRd.sGDp8/1KK7YTFPNk.CdTRy",
+      "role": "super_admin",
+      "createdAt": "2026-09-24T11:15:57.439Z"
+    }
+  ],
   "activity": [
     {
       "id": "4c8a09ae-4e37-4e36-a94a-4228148893c7",

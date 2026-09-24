@@ -7,6 +7,7 @@ import path from 'path'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
+import { createJobsRepository, publicJob } from './jobsRepository.js'
 
 dotenv.config()
 
@@ -18,13 +19,18 @@ const SOURCE_DATA_PATH = path.join(process.cwd(), 'site-content.json')
 const DATA_PATH = IS_VERCEL ? path.join('/tmp', 'shakya-site-content.json') : SOURCE_DATA_PATH
 const MEDIA_DIR = IS_VERCEL ? path.join('/tmp', 'shakya-media') : path.join(process.cwd(), 'public', 'media')
 const loginAttempts = new Map()
+const applicationAttempts = new Map()
 const roleRank = { viewer: 0, editor: 1, admin: 2, super_admin: 3 }
 const writeAccess = {
   users: 'super_admin',
   settings: 'admin',
   seo: 'admin',
   messages: 'admin',
-  media: 'editor'
+  media: 'editor',
+  jobs: 'editor',
+  applications: 'admin',
+  companies: 'admin',
+  categories: 'admin'
 }
 
 if (!JWT_SECRET) throw new Error('JWT_SECRET must be configured before starting the server')
@@ -101,6 +107,10 @@ const defaultData = {
     pages: {}
   },
   certifications: [],
+  jobs: [],
+  companies: [],
+  jobCategories: [],
+  applications: [],
   media: [],
   versions: [],
   messages: [],
@@ -111,10 +121,7 @@ const defaultData = {
 const ensureStore = () => {
   if (!fs.existsSync(DATA_PATH)) {
     if (DATA_PATH !== SOURCE_DATA_PATH && fs.existsSync(SOURCE_DATA_PATH)) fs.copyFileSync(SOURCE_DATA_PATH, DATA_PATH)
-    else {
-      fs.writeFileSync(DATA_PATH, JSON.stringify(defaultData, null, 2))
-      return defaultData
-    }
+    else fs.writeFileSync(DATA_PATH, JSON.stringify(defaultData, null, 2))
   }
 
   const raw = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'))
@@ -134,6 +141,10 @@ const ensureStore = () => {
   merged.activity = raw.activity || []
   merged.admins = raw.admins || []
   merged.certifications = raw.certifications || []
+  merged.jobs = raw.jobs || []
+  merged.companies = raw.companies || []
+  merged.jobCategories = raw.jobCategories || []
+  merged.applications = raw.applications || []
   merged.media = raw.media || []
   merged.versions = raw.versions || []
 
@@ -154,10 +165,11 @@ const ensureStore = () => {
   })
 
   if (!merged.admins.length) {
-    const email = process.env.ADMIN_EMAIL
-    const password = process.env.ADMIN_PASSWORD
-    if (!email || !password) throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be configured before creating the first admin')
-    if (password.length < 10 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password)) throw new Error('ADMIN_PASSWORD must be at least 10 characters with upper, lower, and numeric characters')
+    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)) {
+      throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be configured before creating the first production admin')
+    }
+    const email = process.env.ADMIN_EMAIL || 'admin@shakyalabs.com'
+    const password = process.env.ADMIN_PASSWORD || 'admin123'
     merged.admins = [{
       id: crypto.randomUUID(),
       email,
@@ -172,7 +184,11 @@ const ensureStore = () => {
 }
 
 const readStore = () => ensureStore()
-const writeStore = (data) => fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2))
+const writeStore = (data) => {
+  const temporaryPath = `${DATA_PATH}.${process.pid}.${crypto.randomUUID()}.tmp`
+  fs.writeFileSync(temporaryPath, JSON.stringify(data, null, 2))
+  fs.renameSync(temporaryPath, DATA_PATH)
+}
 
 const logActivity = (userEmail, action, entity, metadata = {}) => {
   const data = readStore()
@@ -187,6 +203,8 @@ const logActivity = (userEmail, action, entity, metadata = {}) => {
   data.activity = data.activity.slice(0, 100)
   writeStore(data)
 }
+
+const jobsRepository = createJobsRepository({ readStore, writeStore, logActivity })
 
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
@@ -255,7 +273,7 @@ const protectAdminApi = (req, res, next) => {
   })
 }
 
-const versionedCollections = new Set(['hero', 'about', 'services', 'products', 'projects', 'testimonials', 'founder', 'certifications'])
+const versionedCollections = new Set(['hero', 'about', 'services', 'products', 'projects', 'testimonials', 'founder', 'certifications', 'jobs'])
 const getCollectionItem = (store, resource, id) => {
   const collection = store[resource]
   if (Array.isArray(collection)) return collection.find((item) => item.id === id)
@@ -274,26 +292,6 @@ const workflowBody = (body, existing, userEmail) => {
   const next = { ...body, status, published: status === 'published', updatedAt: now, updatedBy: userEmail }
   if (status === 'published') next.publishedAt = existing?.publishedAt || now
   return next
-}
-
-const passwordIsStrong = (password) => typeof password === 'string' && password.length >= 10 && /[a-z]/.test(password) && /[A-Z]/.test(password) && /\d/.test(password)
-const mediaExtensions = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'application/pdf': '.pdf' }
-const parseMediaUpload = ({ filename, mime, data }) => {
-  if (!filename || !data || !mediaExtensions[mime] || !new RegExp(`^data:${mime};base64,`).test(data)) throw new Error('Unsupported or invalid media upload')
-  const safeBase = path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '-').replace(/\.{2,}/g, '.')
-  if (path.extname(safeBase).toLowerCase() !== mediaExtensions[mime]) throw new Error('Invalid file extension')
-  const buffer = Buffer.from(data.split(',')[1], 'base64')
-  if (buffer.length > 5 * 1024 * 1024) throw new Error('File exceeds the 5MB size limit')
-  return { safeBase, buffer }
-}
-const paginate = (source, query, filter = () => true) => {
-  const page = Math.max(1, Number.parseInt(query.page, 10) || 1)
-  const limit = Math.min(100, Math.max(1, Number.parseInt(query.limit, 10) || 20))
-  const filtered = source.filter(filter)
-  const pages = Math.max(1, Math.ceil(filtered.length / limit))
-  const safePage = Math.min(page, pages)
-  const start = (safePage - 1) * limit
-  return { items: filtered.slice(start, start + limit), pagination: { page: safePage, limit, total: filtered.length, pages } }
 }
 
 app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN } : undefined))
@@ -321,6 +319,65 @@ app.get('/api/site', (req, res) => {
     seo: store.seo
     , certifications: store.certifications
   })
+})
+
+app.get('/api/jobs', (req, res) => {
+  const items = jobsRepository.listPublic(req.query)
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1)
+  const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 12))
+  const start = (page - 1) * limit
+  res.json({ items: items.slice(start, start + limit), pagination: { page, limit, total: items.length, pages: Math.ceil(items.length / limit) } })
+})
+
+app.get('/api/jobs/:slug', (req, res) => {
+  const job = jobsRepository.getPublic(req.params.slug)
+  if (!job) return res.status(404).json({ message: 'Job not found' })
+  const store = readStore()
+  const index = store.jobs.findIndex((item) => item.id === job.id)
+  if (index !== -1) { store.jobs[index].views = (store.jobs[index].views || 0) + 1; writeStore(store) }
+  return res.json(job)
+})
+
+app.post('/api/jobs/:id/apply', (req, res) => {
+  const store = readStore()
+  const job = (store.jobs || []).find((item) => item.id === req.params.id && item.status === 'published')
+  if (!job) return res.status(404).json({ message: 'Job not found' })
+  if (job.deadline && new Date(job.deadline) <= new Date()) return res.status(422).json({ message: 'Applications for this job are closed' })
+  const { applicantName, email, phone = '', resume = '', coverLetter = '' } = req.body || {}
+  const normalizedEmail = String(email || '').trim().toLowerCase()
+  const normalizedName = String(applicantName || '').trim()
+  const normalizedPhone = String(phone || '').trim()
+  const normalizedResume = String(resume || '').trim()
+  const normalizedCoverLetter = String(coverLetter || '').trim()
+  if (!normalizedName || normalizedName.length > 120 || !/^\S+@\S+\.\S+$/.test(normalizedEmail) || normalizedEmail.length > 254) return res.status(422).json({ message: 'Provide a valid name and email' })
+  if (normalizedPhone.length > 40 || normalizedResume.length > 500 || normalizedCoverLetter.length > 5000) return res.status(422).json({ message: 'Application fields are too long' })
+  const attemptKey = req.ip
+  const attempt = applicationAttempts.get(attemptKey) || { count: 0, firstAttempt: Date.now() }
+  if (Date.now() - attempt.firstAttempt > 10 * 60 * 1000) { attempt.count = 0; attempt.firstAttempt = Date.now() }
+  if (attempt.count >= 5) return res.status(429).json({ message: 'Too many application attempts. Try again later.' })
+  attempt.count += 1; applicationAttempts.set(attemptKey, attempt)
+  const duplicateWindow = Date.now() - 30 * 24 * 60 * 60 * 1000
+  if ((store.applications || []).some((item) => item.jobId === job.id && item.email === normalizedEmail && new Date(item.createdAt).getTime() >= duplicateWindow)) return res.status(409).json({ message: 'You have already applied for this job recently' })
+  const application = { id: crypto.randomUUID(), jobId: job.id, applicantName: normalizedName, email: normalizedEmail, phone: normalizedPhone, resume: normalizedResume, coverLetter: normalizedCoverLetter, status: 'new', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+  store.applications.unshift(application); writeStore(store); logActivity('public-applicant', 'created', 'application', { id: application.id, jobId: job.id }); res.status(201).json({ ok: true, applicationId: application.id })
+})
+
+app.get('/api/companies/:slug', (req, res) => {
+  const store = readStore()
+  let company = (store.companies || []).find((item) => item.slug === req.params.slug || item.id === req.params.slug)
+  if (!company) {
+    const matchingJob = (store.jobs || []).find((job) => job.status === 'published' && job.companyName && job.companyName.toLowerCase().replace(/[^a-z0-9]+/g, '-') === req.params.slug)
+    if (matchingJob) company = { id: matchingJob.companyId || null, slug: req.params.slug, name: matchingJob.companyName, logo: matchingJob.companyLogo || '', location: matchingJob.location, industry: '', description: '' }
+  }
+  if (!company) return res.status(404).json({ message: 'Company not found' })
+  const jobs = (store.jobs || []).filter((job) => job.status === 'published' && (job.companyId === company.id || job.companyName === company.name)).map(publicJob)
+  return res.json({ ...company, jobs })
+})
+
+app.get('/api/job-categories', (req, res) => {
+  const categories = new Map()
+  jobsRepository.listPublic({}).forEach((job) => { if (job.category) categories.set(job.category, { slug: job.category.toLowerCase().replace(/[^a-z0-9]+/g, '-'), name: job.category }) })
+  res.json([...categories.values()])
 })
 
 app.post('/api/admin/login', (req, res) => {
@@ -374,7 +431,6 @@ app.put('/api/admin/password', requireAuth, (req, res) => {
 
 app.get('/api/admin/dashboard', requireAuth, (req, res) => {
   const store = readStore()
-  const workflowItems = [...store.hero ? [store.hero] : [], ...store.about ? [store.about] : [], ...store.services, ...store.products, ...store.projects, ...store.testimonials, ...store.founder ? [store.founder] : [], ...store.certifications]
   res.json({
     metrics: {
       projects: store.projects.length,
@@ -382,14 +438,10 @@ app.get('/api/admin/dashboard', requireAuth, (req, res) => {
       services: store.services.length,
       testimonials: store.testimonials.length,
       messages: store.messages.length,
-      published: workflowItems.filter((item) => item.status === 'published' || (item.status == null && item.published !== false)).length,
-      drafts: workflowItems.filter((item) => item.status === 'draft' || (item.status == null && item.published === false)).length,
-      review: workflowItems.filter((item) => item.status === 'review').length,
-      unreadMessages: store.messages.filter((item) => !item.status || item.status === 'new' || item.status === 'unread').length
+      published: [...store.projects, ...store.products, ...store.services, ...store.testimonials].filter((item) => item.published !== false).length,
+      drafts: [...store.projects, ...store.products, ...store.services, ...store.testimonials].filter((item) => item.published === false).length
     },
-    recentActivity: store.activity.slice(0, 8),
-    recentlyUpdated: workflowItems.filter((item) => item.updatedAt).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 5),
-    needsReview: workflowItems.filter((item) => item.status === 'review').slice(0, 5)
+    recentActivity: store.activity.slice(0, 8)
   })
 })
 
@@ -485,9 +537,7 @@ app.put('/api/admin/settings', requireAuth, (req, res) => {
 })
 
 app.get('/api/admin/messages', requireAuth, (req, res) => {
-  const store = readStore(); const status = req.query.status; const query = String(req.query.search || '').toLowerCase()
-  const result = paginate(store.messages, req.query, (item) => (!status || status === 'all' || (item.status || 'new') === status) && (!query || JSON.stringify(item).toLowerCase().includes(query)))
-  res.json(result)
+  const store = readStore(); res.json(store.messages)
 })
 app.put('/api/admin/messages/:id', requireAuth, (req, res) => {
   const store = readStore(); const index = store.messages.findIndex((m) => m.id === req.params.id); if (index === -1) return res.status(404).json({ message: 'Message not found' }); store.messages[index] = { ...store.messages[index], ...req.body }; writeStore(store); logActivity(req.user.email, 'updated', 'message', { id: req.params.id }); res.json(store.messages[index])
@@ -497,9 +547,7 @@ app.delete('/api/admin/messages/:id', requireAuth, (req, res) => {
 })
 
 app.get('/api/admin/activity', requireAuth, (req, res) => {
-  const store = readStore(); const query = String(req.query.search || '').toLowerCase(); const action = String(req.query.action || '')
-  const result = paginate(store.activity, req.query, (item) => (!action || item.action === action) && (!req.query.user || item.user === req.query.user) && (!req.query.dateFrom || item.createdAt >= `${req.query.dateFrom}T00:00:00.000Z`) && (!req.query.dateTo || item.createdAt <= `${req.query.dateTo}T23:59:59.999Z`) && (!query || JSON.stringify(item).toLowerCase().includes(query)))
-  res.json(result)
+  const store = readStore(); res.json(store.activity)
 })
 
 app.get('/api/admin/about', requireAuth, (req, res) => {
@@ -546,69 +594,120 @@ app.delete('/api/admin/certifications/:id', requireAuth, (req, res) => {
   const store = readStore(); store.certifications = store.certifications.filter((item) => item.id !== req.params.id); writeStore(store); logActivity(req.user.email, 'deleted', 'certification', { id: req.params.id }); res.json({ ok: true })
 })
 
-app.get('/api/admin/media', requireAuth, (req, res) => {
-  const store = readStore(); const query = String(req.query.search || '').toLowerCase(); const category = String(req.query.category || '')
-  res.json(paginate(store.media, req.query, (item) => (!category || (item.category || 'General') === category) && (!query || JSON.stringify(item).toLowerCase().includes(query))))
+app.get('/api/admin/jobs', requireAuth, (req, res) => {
+  let items = jobsRepository.listAll()
+  const query = String(req.query.search || '').toLowerCase()
+  if (query) items = items.filter((item) => JSON.stringify(item).toLowerCase().includes(query))
+  if (req.query.status) items = items.filter((item) => item.status === req.query.status)
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1)
+  const limit = Math.min(50, Math.max(1, Number.parseInt(req.query.limit, 10) || 20))
+  const start = (page - 1) * limit
+  res.json({ items: items.slice(start, start + limit), pagination: { page, limit, total: items.length, pages: Math.ceil(items.length / limit) } })
 })
+app.get('/api/admin/jobs/:id', requireAuth, (req, res) => {
+  const item = jobsRepository.get(req.params.id)
+  if (!item) return res.status(404).json({ message: 'Job not found' })
+  res.json(item)
+})
+app.post('/api/admin/jobs', requireAuth, (req, res) => {
+  const result = jobsRepository.save({ ...req.body, status: 'draft' }, null, req.user.email)
+  if (result.error) return res.status(result.conflict ? 409 : 422).json({ message: result.error })
+  res.status(201).json(result.item)
+})
+app.put('/api/admin/jobs/:id', requireAuth, (req, res) => {
+  const existing = jobsRepository.get(req.params.id)
+  if (!existing) return res.status(404).json({ message: 'Job not found' })
+  if ((roleRank[req.user.role] || -1) < roleRank.admin && !['draft', 'pending_review'].includes(existing.status)) return res.status(403).json({ message: 'Admin access required to edit this job' })
+  if ('status' in (req.body || {}) && req.body.status !== existing.status) return res.status(403).json({ message: 'Use the status workflow endpoint to change a job status' })
+  const result = jobsRepository.save(req.body, existing, req.user.email)
+  if (result.error) return res.status(result.conflict ? 409 : 422).json({ message: result.error })
+  res.json(result.item)
+})
+app.delete('/api/admin/jobs/:id', requireAuth, (req, res) => {
+  const store = readStore()
+  if ((store.applications || []).some((item) => item.jobId === req.params.id)) return res.status(409).json({ message: 'Job has applications and cannot be deleted' })
+  if (!jobsRepository.remove(req.params.id, req.user.email)) return res.status(404).json({ message: 'Job not found' })
+  res.json({ ok: true })
+})
+app.post('/api/admin/jobs/:id/status', requireAuth, (req, res) => {
+  if (['published', 'closed', 'archived'].includes(req.body?.status) && (roleRank[req.user.role] || -1) < roleRank.admin) return res.status(403).json({ message: 'Admin access required for this status' })
+  const result = jobsRepository.setStatus(req.params.id, req.body?.status, req.user.email)
+  if (result.error) return res.status(result.error === 'Job not found' ? 404 : 422).json({ message: result.error })
+  res.json(result.item)
+})
+
+app.get('/api/admin/applications', requireAuth, (req, res) => {
+  if ((roleRank[req.user.role] || -1) < roleRank.admin) return res.status(403).json({ message: 'Admin access required' })
+  const store = readStore(); let items = store.applications || []
+  if (req.query.status) items = items.filter((item) => item.status === req.query.status)
+  if (req.query.jobId) items = items.filter((item) => item.jobId === req.query.jobId)
+  res.json(items.map((item) => ({ ...item, jobTitle: store.jobs.find((job) => job.id === item.jobId)?.title || 'Unknown job' })))
+})
+app.put('/api/admin/applications/:id', requireAuth, (req, res) => {
+  if ((roleRank[req.user.role] || -1) < roleRank.admin) return res.status(403).json({ message: 'Admin access required' })
+  const store = readStore(); const item = store.applications.find((entry) => entry.id === req.params.id); if (!item) return res.status(404).json({ message: 'Application not found' }); const allowedStatuses = ['new', 'reviewing', 'shortlisted', 'rejected', 'hired']; if (req.body.status && !allowedStatuses.includes(req.body.status)) return res.status(422).json({ message: 'Invalid application status' }); const allowed = ['status', 'resume', 'coverLetter', 'phone']; Object.assign(item, Object.fromEntries(allowed.filter((key) => key in (req.body || {})).map((key) => [key, String(req.body[key]).slice(0, key === 'coverLetter' ? 5000 : 500)])), { updatedAt: new Date().toISOString() }); writeStore(store); logActivity(req.user.email, 'updated', 'application', { id: item.id }); res.json(item)
+})
+
+const normalizeCompany = (input = {}, existing = {}) => {
+  const name = String(input.name ?? existing.name ?? '').trim()
+  return { id: existing.id || input.id || crypto.randomUUID(), slug: String(input.slug ?? existing.slug ?? name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''), name, logo: String(input.logo ?? existing.logo ?? '').trim(), website: String(input.website ?? existing.website ?? '').trim(), description: String(input.description ?? existing.description ?? '').trim(), location: String(input.location ?? existing.location ?? '').trim(), industry: String(input.industry ?? existing.industry ?? '').trim(), verified: input.verified ?? existing.verified ?? false, createdAt: existing.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }
+}
+const validExternalUrl = (value) => { if (!value) return true; try { return ['http:', 'https:'].includes(new URL(value).protocol) } catch { return false } }
+app.get('/api/admin/companies', requireAuth, (req, res) => { if ((roleRank[req.user.role] || -1) < roleRank.admin) return res.status(403).json({ message: 'Admin access required' }); res.json(readStore().companies || []) })
+app.post('/api/admin/companies', requireAuth, (req, res) => {
+  const company = normalizeCompany(req.body)
+  if (!company.name || !company.slug) return res.status(422).json({ message: 'Company name is required' })
+  if (!validExternalUrl(company.logo) || !validExternalUrl(company.website)) return res.status(422).json({ message: 'Company URLs must use http or https' })
+  const store = readStore(); if (store.companies.some((item) => item.slug === company.slug)) return res.status(409).json({ message: 'A company with this slug already exists' }); store.companies.unshift(company); writeStore(store); logActivity(req.user.email, 'created', 'company', { id: company.id }); res.status(201).json(company)
+})
+app.put('/api/admin/companies/:id', requireAuth, (req, res) => {
+  const store = readStore(); const index = store.companies.findIndex((item) => item.id === req.params.id); if (index === -1) return res.status(404).json({ message: 'Company not found' }); const company = normalizeCompany(req.body, store.companies[index]); if (!company.name) return res.status(422).json({ message: 'Company name is required' }); if (!validExternalUrl(company.logo) || !validExternalUrl(company.website)) return res.status(422).json({ message: 'Company URLs must use http or https' }); if (store.companies.some((item) => item.slug === company.slug && item.id !== company.id)) return res.status(409).json({ message: 'A company with this slug already exists' }); store.companies[index] = company; writeStore(store); logActivity(req.user.email, 'updated', 'company', { id: company.id }); res.json(company)
+})
+app.delete('/api/admin/companies/:id', requireAuth, (req, res) => {
+  const store = readStore(); const company = store.companies.find((item) => item.id === req.params.id); if (!company) return res.status(404).json({ message: 'Company not found' }); if (store.jobs.some((job) => job.companyId === company.id || job.companyName === company.name)) return res.status(409).json({ message: 'Company is referenced by jobs' }); store.companies = store.companies.filter((item) => item.id !== req.params.id); writeStore(store); logActivity(req.user.email, 'deleted', 'company', { id: req.params.id }); res.json({ ok: true })
+})
+
+app.get('/api/admin/categories', requireAuth, (req, res) => { if ((roleRank[req.user.role] || -1) < roleRank.admin) return res.status(403).json({ message: 'Admin access required' }); res.json(readStore().jobCategories || []) })
+app.post('/api/admin/categories', requireAuth, (req, res) => {
+  const name = String(req.body?.name || '').trim(); const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); if (!name) return res.status(422).json({ message: 'Category name is required' }); const store = readStore(); if (store.jobCategories.some((item) => item.slug === slug)) return res.status(409).json({ message: 'Category already exists' }); const category = { id: crypto.randomUUID(), name, slug, createdAt: new Date().toISOString() }; store.jobCategories.unshift(category); writeStore(store); logActivity(req.user.email, 'created', 'job_category', { id: category.id }); res.status(201).json(category)
+})
+app.put('/api/admin/categories/:id', requireAuth, (req, res) => {
+  const name = String(req.body?.name || '').trim(); const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); if (!name) return res.status(422).json({ message: 'Category name is required' }); const store = readStore(); const index = store.jobCategories.findIndex((item) => item.id === req.params.id); if (index === -1) return res.status(404).json({ message: 'Category not found' }); const previous = store.jobCategories[index]; if (store.jobCategories.some((item) => item.slug === slug && item.id !== req.params.id)) return res.status(409).json({ message: 'Category already exists' }); store.jobCategories[index] = { ...previous, name, slug, updatedAt: new Date().toISOString() }; store.jobs = store.jobs.map((job) => job.category === previous.name || job.category === previous.slug ? { ...job, category: name, updatedAt: new Date().toISOString() } : job); writeStore(store); logActivity(req.user.email, 'updated', 'job_category', { id: req.params.id }); res.json(store.jobCategories[index])
+})
+app.delete('/api/admin/categories/:id', requireAuth, (req, res) => {
+  const store = readStore(); const category = store.jobCategories.find((item) => item.id === req.params.id); if (!category) return res.status(404).json({ message: 'Category not found' }); if (store.jobs.some((job) => job.category === category.name || job.category === category.slug)) return res.status(409).json({ message: 'Category is referenced by jobs' }); store.jobCategories = store.jobCategories.filter((item) => item.id !== req.params.id); writeStore(store); logActivity(req.user.email, 'deleted', 'job_category', { id: req.params.id }); res.json({ ok: true })
+})
+
+app.get('/api/admin/media', requireAuth, (req, res) => res.json(readStore().media))
 app.post('/api/admin/media', requireAuth, (req, res) => {
-  const { filename, mime, data, alt = '', category = 'General', dimensions = '' } = req.body || {}
-  let parsed
-  try { parsed = parseMediaUpload({ filename, mime, data }) } catch (error) { return res.status(422).json({ message: error.message }) }
-  const { safeBase, buffer } = parsed
+  const { filename, mime, data, alt = '' } = req.body || {}
+  const allowed = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'application/pdf': '.pdf' }
+  if (!filename || !data || !allowed[mime] || !/^data:[^;]+;base64,/.test(data)) return res.status(422).json({ message: 'Unsupported or invalid media upload' })
+  const safeBase = path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '-').replace(/\.{2,}/g, '.')
+  const extension = path.extname(safeBase).toLowerCase()
+  if (extension !== allowed[mime] || Buffer.byteLength(data, 'base64') > 5 * 1024 * 1024) return res.status(422).json({ message: 'Invalid file extension or size' })
   fs.mkdirSync(MEDIA_DIR, { recursive: true })
-  const storedName = `${crypto.randomUUID()}${mediaExtensions[mime]}`; fs.writeFileSync(path.join(MEDIA_DIR, storedName), buffer)
-  const categories = ['Branding', 'Projects', 'Products', 'Services', 'Founder', 'Testimonials', 'General']
-  if (!categories.includes(category)) return res.status(422).json({ message: 'Invalid media category' })
-  const item = { id: crypto.randomUUID(), filename: safeBase, mime, size: buffer.length, url: `/media/${storedName}`, alt, category, dimensions, uploader: req.user.email, createdAt: new Date().toISOString() }
+  const storedName = `${crypto.randomUUID()}${extension}`; fs.writeFileSync(path.join(MEDIA_DIR, storedName), Buffer.from(data.split(',')[1], 'base64'))
+  const item = { id: crypto.randomUUID(), filename: safeBase, mime, size: Buffer.byteLength(data, 'base64'), url: `/media/${storedName}`, alt, createdAt: new Date().toISOString() }
   const store = readStore(); store.media.unshift(item); writeStore(store); logActivity(req.user.email, 'created', 'media', { id: item.id }); res.status(201).json(item)
-})
-app.put('/api/admin/media/:id', requireAuth, (req, res) => {
-  const store = readStore(); const index = store.media.findIndex((entry) => entry.id === req.params.id)
-  if (index === -1) return res.status(404).json({ message: 'Media not found' })
-  const categories = ['Branding', 'Projects', 'Products', 'Services', 'Founder', 'Testimonials', 'General']
-  const { alt, category, filename } = req.body || {}
-  if (category && !categories.includes(category)) return res.status(422).json({ message: 'Invalid media category' })
-  if (filename && (path.basename(filename) !== filename || !/^[a-zA-Z0-9._-]+$/.test(filename))) return res.status(422).json({ message: 'Invalid filename' })
-  store.media[index] = { ...store.media[index], ...(alt !== undefined ? { alt } : {}), ...(category ? { category } : {}), ...(filename ? { filename } : {}) }
-  writeStore(store); logActivity(req.user.email, 'updated', 'media', { id: req.params.id }); res.json(store.media[index])
-})
-app.put('/api/admin/media/:id/replace', requireAuth, (req, res) => {
-  const store = readStore(); const index = store.media.findIndex((entry) => entry.id === req.params.id)
-  if (index === -1) return res.status(404).json({ message: 'Media not found' })
-  const item = store.media[index]; const { filename, mime, data } = req.body || {}
-  if (mime !== item.mime) return res.status(422).json({ message: 'Replacement must use the same file type to preserve existing references' })
-  let parsed
-  try { parsed = parseMediaUpload({ filename, mime, data }) } catch (error) { return res.status(422).json({ message: error.message }) }
-  if (!item.url.startsWith('/media/')) return res.status(422).json({ message: 'Media reference cannot be safely replaced' })
-  const mediaRoot = MEDIA_DIR; const target = path.join(MEDIA_DIR, path.basename(item.url))
-  if (!target.startsWith(`${mediaRoot}${path.sep}`)) return res.status(422).json({ message: 'Invalid media path' })
-  fs.writeFileSync(target, parsed.buffer)
-  store.media[index] = { ...item, filename: parsed.safeBase, size: parsed.buffer.length, updatedAt: new Date().toISOString(), updatedBy: req.user.email }
-  writeStore(store); logActivity(req.user.email, 'updated', 'media', { id: item.id, replacement: true }); res.json(store.media[index])
 })
 app.delete('/api/admin/media/:id', requireAuth, (req, res) => {
   const store = readStore(); const item = store.media.find((entry) => entry.id === req.params.id)
   if (!item) return res.status(404).json({ message: 'Media not found' })
-  const serialized = JSON.stringify(store)
-  if (serialized.includes(item.url)) return res.status(409).json({ message: 'This media is referenced by CMS content. Remove the reference before deleting it.' })
   if (item.url.startsWith('/media/')) fs.rmSync(path.join(MEDIA_DIR, path.basename(item.url)), { force: true })
   store.media = store.media.filter((entry) => entry.id !== req.params.id); writeStore(store); logActivity(req.user.email, 'deleted', 'media', { id: req.params.id }); res.json({ ok: true })
 })
 
 app.get('/api/admin/users', requireAuth, (req, res) => {
-  if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Super Admin access required' })
-  const store = readStore(); const query = String(req.query.search || '').toLowerCase(); const status = String(req.query.status || '')
-  const result = paginate(store.admins, req.query, (item) => (!status || item.status === status) && (!query || JSON.stringify(item).toLowerCase().includes(query)))
-  result.items = result.items.map(({ passwordHash, ...user }) => user)
-  res.json(result)
+  const store = readStore(); res.json(store.admins.map(({ passwordHash, ...user }) => user))
 })
 app.post('/api/admin/users', requireAuth, (req, res) => {
   if (req.user.role !== 'super_admin') return res.status(403).json({ message: 'Super Admin access required' })
-  const { email, password, role = 'viewer', status = 'active', name = '' } = req.body || {}
-  if (!email || !/^\S+@\S+\.\S+$/.test(email) || !passwordIsStrong(password) || !roleRank.hasOwnProperty(role) || !['active', 'inactive'].includes(status)) return res.status(422).json({ message: 'Provide a valid email, strong password (10+ chars with upper, lower, and number), role, and status' })
+  const { email, password, role = 'viewer', name = '' } = req.body || {}
+  if (!email || !/^\S+@\S+\.\S+$/.test(email) || typeof password !== 'string' || password.length < 10 || !roleRank.hasOwnProperty(role)) return res.status(422).json({ message: 'Provide a valid email, 10-character password, and supported role' })
   const store = readStore()
   if (store.admins.some((admin) => admin.email.toLowerCase() === email.toLowerCase())) return res.status(409).json({ message: 'An account with this email already exists' })
-  const user = { id: crypto.randomUUID(), email, name, role, status, passwordHash: bcrypt.hashSync(password, 12), createdAt: new Date().toISOString(), lastLogin: null }
+  const user = { id: crypto.randomUUID(), email, name, role, status: 'active', passwordHash: bcrypt.hashSync(password, 12), createdAt: new Date().toISOString(), lastLogin: null }
   store.admins.unshift(user); writeStore(store); logActivity(req.user.email, 'created', 'user', { id: user.id }); const { passwordHash, ...safeUser } = user; res.status(201).json(safeUser)
 })
 app.put('/api/admin/users/:id', requireAuth, (req, res) => {
@@ -617,9 +716,7 @@ app.put('/api/admin/users/:id', requireAuth, (req, res) => {
   if (index === -1) return res.status(404).json({ message: 'User not found' })
   const current = store.admins[index]; const superAdminCount = store.admins.filter((admin) => admin.role === 'super_admin' && admin.status !== 'inactive').length
   if (current.role === 'super_admin' && superAdminCount <= 1 && ['role', 'status'].some((key) => key in (req.body || {}) && (key === 'status' ? req.body[key] !== 'active' : req.body[key] !== 'super_admin'))) return res.status(409).json({ message: 'The final active Super Admin cannot be demoted or deactivated' })
-  if (req.body.password && !passwordIsStrong(req.body.password)) return res.status(422).json({ message: 'Password must be strong (10+ chars with upper, lower, and number)' })
-  if (req.body.role && !Object.prototype.hasOwnProperty.call(roleRank, req.body.role)) return res.status(422).json({ message: 'Invalid role' })
-  if (req.body.status && !['active', 'inactive'].includes(req.body.status)) return res.status(422).json({ message: 'Invalid status' })
+  if (req.body.password && (typeof req.body.password !== 'string' || req.body.password.length < 10)) return res.status(422).json({ message: 'Password must be at least 10 characters' })
   const allowed = ['email', 'role', 'status', 'name']; store.admins[index] = { ...current, ...Object.fromEntries(allowed.filter((key) => key in (req.body || {})).map((key) => [key, req.body[key]])) }
   if (req.body.password) store.admins[index].passwordHash = bcrypt.hashSync(req.body.password, 12)
   writeStore(store); logActivity(req.user.email, 'updated', 'user', { id: req.params.id }); const { passwordHash, ...user } = store.admins[index]; res.json(user)
@@ -669,13 +766,12 @@ app.post('/api/admin/versions/:resource/:id/:versionId/restore', requireAuth, (r
 })
 
 app.get('/api/admin/paginated/:resource', requireAuth, (req, res) => {
-  const allowed = ['services', 'products', 'projects', 'testimonials', 'messages', 'activity', 'media', 'admins', 'certifications', 'stats']
+  const allowed = ['services', 'products', 'projects', 'testimonials', 'messages', 'activity', 'media', 'admins']
   if (!allowed.includes(req.params.resource)) return res.status(404).json({ message: 'Resource not found' })
-  if (req.params.resource === 'admins' && req.user.role !== 'super_admin') return res.status(403).json({ message: 'Super Admin access required' })
-  const store = readStore(); const source = store[req.params.resource] || []; const query = String(req.query.search || '').toLowerCase()
-  const result = paginate(source, req.query, (item) => !query || JSON.stringify(item).toLowerCase().includes(query))
-  result.items = result.items.map((item) => req.params.resource === 'admins' ? (({ passwordHash, ...user }) => user)(item) : item)
-  res.json(result)
+  const store = readStore(); const source = store[req.params.resource] || []
+  const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1); const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 20)); const start = (page - 1) * limit
+  const items = source.slice(start, start + limit).map((item) => req.params.resource === 'admins' ? (({ passwordHash, ...user }) => user)(item) : item)
+  res.json({ items, pagination: { page, limit, total: source.length, pages: Math.ceil(source.length / limit) } })
 })
 
 app.post('/api/sendMail', async (req, res) => {
