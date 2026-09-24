@@ -31,6 +31,22 @@
   box-sizing: border-box;
 }
 
+html, body, #root {
+  min-height: 100%;
+}
+
+body {
+  overflow-x: clip;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+}
+
+button, input, textarea, select {
+  min-width: 0;
+}
+
 html {
   scroll-behavior: smooth;
 }

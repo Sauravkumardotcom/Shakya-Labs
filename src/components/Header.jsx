@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ShakyaLabsLogo from './ShakyaLabsLogo';
 
 const Header = ({ settings }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setMobileMenuOpen(false); };
+    document.addEventListener('keydown', closeOnEscape);
+    return () => document.removeEventListener('keydown', closeOnEscape);
+  }, []);
 
   const navLinks = [
     { name: 'About', href: '#about' },
@@ -38,6 +44,8 @@ const Header = ({ settings }) => {
             className="md:hidden shrink-0 text-white p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="main-mobile-menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileMenuOpen ? (
@@ -51,7 +59,7 @@ const Header = ({ settings }) => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-shakya-border">
+          <div id="main-mobile-menu" className="md:hidden py-4 border-t border-shakya-border">
             <nav className="flex flex-col space-y-3">
               {navLinks.map((link) => (
                 <a

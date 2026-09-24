@@ -124,3 +124,30 @@
 .jobs-intake-layout { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 1.2fr); gap: 20px; max-width: 1400px; }.jobs-intake-layout h2, .jobs-intake-layout h3 { margin-top: 0; }.jobs-intake-layout .jobs-admin-row { width: 100%; border: 0; color: inherit; text-align: left; cursor: pointer; }.jobs-intake-layout .jobs-admin-row.active { outline: 1px solid var(--admin-cyan); }.jobs-raw-message { max-height: 240px; overflow: auto; padding: 14px; border: 1px solid var(--admin-border); border-radius: 7px; background: #0a1626; color: #d4deea; white-space: pre-wrap; }.jobs-draft-json { width: 100%; min-height: 360px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.5; }.jobs-intake-layout .form-actions { flex-wrap: wrap; }
 @media (max-width: 700px) { .jobs-admin-toolbar { align-items: flex-start; flex-direction: column; }.jobs-admin-toolbar .primary-button, .jobs-admin-toolbar .secondary-button { width: 100%; }.jobs-admin-filters, .jobs-inline-form { grid-template-columns: 1fr; display: grid; }.jobs-admin-row { align-items: flex-start; flex-direction: column; }.jobs-admin-row .row-actions { width: 100%; flex-wrap: wrap; }.jobs-admin-row .row-actions > * { flex: 1; }.jobs-inline-form button { width: 100%; } }
 @media (max-width: 900px) { .jobs-intake-layout { grid-template-columns: 1fr; } }
+
+/* Responsive audit safeguards: the document owns page scrolling; only the sidebar and review fields scroll internally. */
+.admin-shell { min-height: 100svh; }
+.admin-main { overflow-x: clip; overflow-y: visible; }
+.admin-header, .admin-main, .panel, .page-header, .jobs-admin-toolbar { min-width: 0; }
+.admin-nav { min-height: 0; min-width: 0; }
+.jobs-admin-list, .resource-list, .message-list, .media-grid { min-width: 0; }
+.jobs-raw-message, .jobs-draft-json, .preview-content pre { max-width: 100%; overflow-wrap: anywhere; }
+
+@media (max-width: 1100px) {
+  .admin-main { padding-inline: 28px !important; }
+  .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  .admin-sidebar { max-height: 100svh; }
+  .admin-nav { overflow-y: auto; }
+  .admin-main { padding-inline: 20px !important; }
+  .form-actions { flex-wrap: wrap; }
+  .form-actions > * { flex: 1 1 140px; }
+}
+
+@media (max-width: 480px) {
+  .admin-main { padding-inline: 16px !important; }
+  .panel { max-width: 100%; }
+  .form-actions > * { width: 100%; flex-basis: 100%; }
+}
