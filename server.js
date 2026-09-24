@@ -13,7 +13,10 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 5000
 const JWT_SECRET = process.env.JWT_SECRET
-const DATA_PATH = path.join(process.cwd(), 'site-content.json')
+const IS_VERCEL = process.env.VERCEL === '1'
+const SOURCE_DATA_PATH = path.join(process.cwd(), 'site-content.json')
+const DATA_PATH = IS_VERCEL ? path.join('/tmp', 'shakya-site-content.json') : SOURCE_DATA_PATH
+const MEDIA_DIR = IS_VERCEL ? path.join('/tmp', 'shakya-media') : path.join(process.cwd(), 'public', 'media')
 const loginAttempts = new Map()
 const roleRank = { viewer: 0, editor: 1, admin: 2, super_admin: 3 }
 const writeAccess = {
@@ -107,8 +110,11 @@ const defaultData = {
 
 const ensureStore = () => {
   if (!fs.existsSync(DATA_PATH)) {
-    fs.writeFileSync(DATA_PATH, JSON.stringify(defaultData, null, 2))
-    return defaultData
+    if (DATA_PATH !== SOURCE_DATA_PATH && fs.existsSync(SOURCE_DATA_PATH)) fs.copyFileSync(SOURCE_DATA_PATH, DATA_PATH)
+    else {
+      fs.writeFileSync(DATA_PATH, JSON.stringify(defaultData, null, 2))
+      return defaultData
+    }
   }
 
   const raw = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'))
@@ -292,7 +298,8 @@ const paginate = (source, query, filter = () => true) => {
 
 app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN } : undefined))
 app.use(express.json({ limit: '10mb' }))
-app.use('/media', express.static(path.join(process.cwd(), 'public', 'media')))
+fs.mkdirSync(MEDIA_DIR, { recursive: true })
+app.use(['/media', '/api/media'], express.static(MEDIA_DIR))
 app.use('/api/admin', protectAdminApi)
 
 app.get('/api/health', (req, res) => {
@@ -548,8 +555,8 @@ app.post('/api/admin/media', requireAuth, (req, res) => {
   let parsed
   try { parsed = parseMediaUpload({ filename, mime, data }) } catch (error) { return res.status(422).json({ message: error.message }) }
   const { safeBase, buffer } = parsed
-  const mediaDir = path.join(process.cwd(), 'public', 'media'); fs.mkdirSync(mediaDir, { recursive: true })
-  const storedName = `${crypto.randomUUID()}${mediaExtensions[mime]}`; fs.writeFileSync(path.join(mediaDir, storedName), buffer)
+  fs.mkdirSync(MEDIA_DIR, { recursive: true })
+  const storedName = `${crypto.randomUUID()}${mediaExtensions[mime]}`; fs.writeFileSync(path.join(MEDIA_DIR, storedName), buffer)
   const categories = ['Branding', 'Projects', 'Products', 'Services', 'Founder', 'Testimonials', 'General']
   if (!categories.includes(category)) return res.status(422).json({ message: 'Invalid media category' })
   const item = { id: crypto.randomUUID(), filename: safeBase, mime, size: buffer.length, url: `/media/${storedName}`, alt, category, dimensions, uploader: req.user.email, createdAt: new Date().toISOString() }
@@ -573,7 +580,7 @@ app.put('/api/admin/media/:id/replace', requireAuth, (req, res) => {
   let parsed
   try { parsed = parseMediaUpload({ filename, mime, data }) } catch (error) { return res.status(422).json({ message: error.message }) }
   if (!item.url.startsWith('/media/')) return res.status(422).json({ message: 'Media reference cannot be safely replaced' })
-  const mediaRoot = path.join(process.cwd(), 'public', 'media'); const target = path.join(process.cwd(), 'public', item.url.slice(1))
+  const mediaRoot = MEDIA_DIR; const target = path.join(MEDIA_DIR, path.basename(item.url))
   if (!target.startsWith(`${mediaRoot}${path.sep}`)) return res.status(422).json({ message: 'Invalid media path' })
   fs.writeFileSync(target, parsed.buffer)
   store.media[index] = { ...item, filename: parsed.safeBase, size: parsed.buffer.length, updatedAt: new Date().toISOString(), updatedBy: req.user.email }
@@ -584,7 +591,7 @@ app.delete('/api/admin/media/:id', requireAuth, (req, res) => {
   if (!item) return res.status(404).json({ message: 'Media not found' })
   const serialized = JSON.stringify(store)
   if (serialized.includes(item.url)) return res.status(409).json({ message: 'This media is referenced by CMS content. Remove the reference before deleting it.' })
-  if (item.url.startsWith('/media/')) fs.rmSync(path.join(process.cwd(), 'public', item.url.slice(1)), { force: true })
+  if (item.url.startsWith('/media/')) fs.rmSync(path.join(MEDIA_DIR, path.basename(item.url)), { force: true })
   store.media = store.media.filter((entry) => entry.id !== req.params.id); writeStore(store); logActivity(req.user.email, 'deleted', 'media', { id: req.params.id }); res.json({ ok: true })
 })
 
@@ -724,6 +731,10 @@ app.post('/api/sendMail', async (req, res) => {
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`)
-})
+if (!IS_VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`)
+  })
+}
+
+export default app

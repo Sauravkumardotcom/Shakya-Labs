@@ -120,6 +120,12 @@ Open `/admin/login` after starting the frontend and API. The CMS uses the JSON f
 
 The API enforces authorization server-side. Passwords are hashed and are never returned by admin API responses. Use `npm run build` to validate the production frontend bundle.
 
+### Vercel deployment
+
+Vercel runs the existing Express app through `api/index.js`. `vercel.json` rewrites `/api/*` requests to that function and rewrites direct SPA routes such as `/admin/login` to the Vite `index.html`.
+
+The current JSON/filesystem persistence is not durable on Vercel. The bundled `site-content.json` is used as a read-only seed, while runtime JSON writes and uploaded media use the function's temporary `/tmp` filesystem and can disappear between cold starts or instances. Move CMS data to a database or durable storage, and media to object storage such as Vercel Blob or S3-compatible storage, before relying on CMS writes in production.
+
 ## Features
 
 ### Home Page
