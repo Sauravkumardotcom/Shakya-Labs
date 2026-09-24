@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { createJobsRepository, publicJob } from './jobsRepository.js'
 import { createWhatsappIntakeRepository } from './whatsappIntakeRepository.js'
+import { createDurablePersistence } from './durablePersistence.js'
 
 dotenv.config()
 
@@ -187,12 +188,16 @@ const ensureStore = () => {
   return merged
 }
 
-const readStore = () => ensureStore()
-const writeStore = (data) => {
+const legacyReadStore = () => ensureStore()
+const legacyWriteStore = (data) => {
   const temporaryPath = `${DATA_PATH}.${process.pid}.${crypto.randomUUID()}.tmp`
   fs.writeFileSync(temporaryPath, JSON.stringify(data, null, 2))
   fs.renameSync(temporaryPath, DATA_PATH)
 }
+
+const durablePersistence = createDurablePersistence({ defaultData, sourceDataPath: SOURCE_DATA_PATH, legacyRead: legacyReadStore, legacyWrite: legacyWriteStore })
+const readStore = durablePersistence.readStore
+const writeStore = durablePersistence.writeStore
 
 const logActivity = (userEmail, action, entity, metadata = {}) => {
   const data = readStore()
@@ -303,6 +308,7 @@ app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN } : und
 app.use(express.json({ limit: '10mb' }))
 fs.mkdirSync(MEDIA_DIR, { recursive: true })
 app.use(['/media', '/api/media'], express.static(MEDIA_DIR))
+app.use(durablePersistence.middleware)
 app.use('/api/admin', protectAdminApi)
 
 app.get('/api/health', (req, res) => {

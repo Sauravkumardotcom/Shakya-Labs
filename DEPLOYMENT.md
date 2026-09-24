@@ -100,6 +100,16 @@ VITE_APP_NAME=Shakya Labs
 VITE_API_URL=https://api.yourdomain.com
 ```
 
+### Durable Jobs Persistence
+
+Vercel filesystem storage is ephemeral. Configure a hosted PostgreSQL-compatible database (for example Neon) and set `DATABASE_URL` in the Vercel project environment variables for Production, Preview, and local development when testing the durable path. The server creates the schema on first connection; for an explicit one-time migration from the current JSON store, run:
+
+```bash
+DATABASE_URL="your-connection-string" npm run db:migrate
+```
+
+The migration refuses to overwrite a database that already contains `app_state`. Never commit the connection string. Without `DATABASE_URL`, local development continues to use the existing JSON store; Vercel production refuses to start instead of falling back to ephemeral `/tmp` storage.
+
 ### 2. Contact Form Integration
 
 Update the `handleSubmit` function in `App.jsx`:
