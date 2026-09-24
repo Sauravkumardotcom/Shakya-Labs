@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { createJobsRepository, publicJob } from './jobsRepository.js'
+import { createWhatsappIntakeRepository } from './whatsappIntakeRepository.js'
 
 dotenv.config()
 
@@ -29,6 +30,7 @@ const writeAccess = {
   media: 'editor',
   jobs: 'editor',
   applications: 'admin',
+  'whatsapp-intakes': 'admin',
   companies: 'admin',
   categories: 'admin'
 }
@@ -111,6 +113,7 @@ const defaultData = {
   companies: [],
   jobCategories: [],
   applications: [],
+  whatsappIntakes: [],
   media: [],
   versions: [],
   messages: [],
@@ -145,6 +148,7 @@ const ensureStore = () => {
   merged.companies = raw.companies || []
   merged.jobCategories = raw.jobCategories || []
   merged.applications = raw.applications || []
+  merged.whatsappIntakes = raw.whatsappIntakes || []
   merged.media = raw.media || []
   merged.versions = raw.versions || []
 
@@ -205,6 +209,7 @@ const logActivity = (userEmail, action, entity, metadata = {}) => {
 }
 
 const jobsRepository = createJobsRepository({ readStore, writeStore, logActivity })
+const whatsappIntakeRepository = createWhatsappIntakeRepository({ readStore, writeStore, logActivity })
 
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
@@ -634,6 +639,43 @@ app.post('/api/admin/jobs/:id/status', requireAuth, (req, res) => {
   const result = jobsRepository.setStatus(req.params.id, req.body?.status, req.user.email)
   if (result.error) return res.status(result.error === 'Job not found' ? 404 : 422).json({ message: result.error })
   res.json(result.item)
+})
+
+const requireIntakeAdmin = requireMinimumRole('admin')
+app.get('/api/admin/whatsapp-intakes', requireAuth, requireIntakeAdmin, (req, res) => {
+  const status = String(req.query.status || '')
+  const items = whatsappIntakeRepository.list().filter((item) => !status || item.status === status)
+  res.json(items.map(({ rawMessage, ...item }) => ({ ...item, hasRawMessage: Boolean(rawMessage) })))
+})
+app.get('/api/admin/whatsapp-intakes/:id', requireAuth, requireIntakeAdmin, (req, res) => {
+  const item = whatsappIntakeRepository.get(req.params.id)
+  if (!item) return res.status(404).json({ message: 'WhatsApp intake not found' })
+  res.json(item)
+})
+app.post('/api/admin/whatsapp-intakes', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappIntakeRepository.receive(req.body, req.user.email)
+  if (result.error) return res.status(422).json({ message: result.error })
+  res.status(201).json(result.item)
+})
+app.post('/api/admin/whatsapp-intakes/:id/process', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappIntakeRepository.process(req.params.id, jobsRepository.listAll(), req.user.email)
+  if (result.error) return res.status(404).json({ message: result.error })
+  res.json(result.item)
+})
+app.put('/api/admin/whatsapp-intakes/:id', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappIntakeRepository.updateDraft(req.params.id, req.body?.extracted || {}, jobsRepository.listAll(), req.user.email)
+  if (result.error) return res.status(422).json({ message: result.error })
+  res.json(result.item)
+})
+app.post('/api/admin/whatsapp-intakes/:id/reject', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappIntakeRepository.reject(req.params.id, req.user.email)
+  if (result.error) return res.status(404).json({ message: result.error })
+  res.json(result.item)
+})
+app.post('/api/admin/whatsapp-intakes/:id/approve', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappIntakeRepository.approve(req.params.id, jobsRepository, req.user.email)
+  if (result.error) return res.status(result.conflict ? 409 : 422).json({ message: result.error })
+  res.status(201).json(result)
 })
 
 app.get('/api/admin/applications', requireAuth, (req, res) => {
