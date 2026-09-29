@@ -8,8 +8,14 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { createJobsRepository, publicJob } from './jobsRepository.js'
+import { seedInitialAdmin, verifyAdminCredentials } from './adminAuthentication.js'
 import { createWhatsappIntakeRepository } from './whatsappIntakeRepository.js'
+import { createMetaWhatsAppProvider } from './metaWhatsAppProvider.js'
+import { configuredRateLimit } from './webhookRateLimiter.js'
+import { createChatDiscoveryHandler, createListenerIngestionHandler } from './whatsappListenerIngestion.js'
+import { isSafeChatId } from './whatsappGroupListenerUtils.js'
 import { createDurablePersistence } from './durablePersistence.js'
+import { createWhatsAppChatRepository } from './whatsappChatRepository.js'
 
 dotenv.config()
 
@@ -32,6 +38,7 @@ const writeAccess = {
   jobs: 'editor',
   applications: 'admin',
   'whatsapp-intakes': 'admin',
+  'whatsapp-chats': 'admin',
   companies: 'admin',
   categories: 'admin'
 }
@@ -115,6 +122,7 @@ const defaultData = {
   jobCategories: [],
   applications: [],
   whatsappIntakes: [],
+  whatsappChats: [],
   media: [],
   versions: [],
   messages: [],
@@ -150,6 +158,7 @@ const ensureStore = () => {
   merged.jobCategories = raw.jobCategories || []
   merged.applications = raw.applications || []
   merged.whatsappIntakes = raw.whatsappIntakes || []
+  merged.whatsappChats = raw.whatsappChats || []
   merged.media = raw.media || []
   merged.versions = raw.versions || []
 
@@ -169,20 +178,17 @@ const ensureStore = () => {
     }
   })
 
-  if (!merged.admins.length) {
-    if (process.env.NODE_ENV === 'production' && (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD)) {
-      throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be configured before creating the first production admin')
-    }
-    const email = process.env.ADMIN_EMAIL || 'admin@shakyalabs.com'
-    const password = process.env.ADMIN_PASSWORD || 'admin123'
-    merged.admins = [{
-      id: crypto.randomUUID(),
-      email,
-      passwordHash: bcrypt.hashSync(password, 10),
-      role: 'super_admin',
-      createdAt: new Date().toISOString()
-    }]
-  }
+  const seededAdmins = seedInitialAdmin({
+    admins: merged.admins,
+    email: process.env.ADMIN_EMAIL,
+    password: process.env.ADMIN_PASSWORD,
+    production: process.env.NODE_ENV === 'production',
+    createHash: (password) => bcrypt.hashSync(password, 10),
+    createId: crypto.randomUUID,
+    createdAt: new Date().toISOString()
+  })
+  if (seededAdmins.error) throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be configured before creating the first production admin')
+  merged.admins = seededAdmins.admins
 
   fs.writeFileSync(DATA_PATH, JSON.stringify(merged, null, 2))
   return merged
@@ -195,7 +201,25 @@ const legacyWriteStore = (data) => {
   fs.renameSync(temporaryPath, DATA_PATH)
 }
 
-const durablePersistence = createDurablePersistence({ defaultData, sourceDataPath: SOURCE_DATA_PATH, legacyRead: legacyReadStore, legacyWrite: legacyWriteStore })
+const durablePersistence = createDurablePersistence({
+  defaultData,
+  sourceDataPath: SOURCE_DATA_PATH,
+  legacyRead: legacyReadStore,
+  legacyWrite: legacyWriteStore,
+  createInitialAdmin: () => {
+    const result = seedInitialAdmin({
+      admins: [],
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      production: process.env.NODE_ENV === 'production',
+      createHash: (password) => bcrypt.hashSync(password, 10),
+      createId: crypto.randomUUID,
+      createdAt: new Date().toISOString()
+    })
+    if (result.error) throw new Error('ADMIN_EMAIL and ADMIN_PASSWORD must be configured before creating the first production admin')
+    return result.admins
+  }
+})
 const readStore = durablePersistence.readStore
 const writeStore = durablePersistence.writeStore
 
@@ -215,6 +239,72 @@ const logActivity = (userEmail, action, entity, metadata = {}) => {
 
 const jobsRepository = createJobsRepository({ readStore, writeStore, logActivity })
 const whatsappIntakeRepository = createWhatsappIntakeRepository({ readStore, writeStore, logActivity })
+const whatsappChatRepository = createWhatsAppChatRepository({ readStore, writeStore })
+const listenerConfiguredSourceChatSetting = String(process.env.WHATSAPP_SOURCE_CHAT_ID || '').trim()
+const listenerSourceChatId = listenerConfiguredSourceChatSetting
+  ? (isSafeChatId(listenerConfiguredSourceChatSetting) ? listenerConfiguredSourceChatSetting : '')
+  : (() => {
+      const legacyId = String(process.env.WHATSAPP_SOURCE_GROUP_ID || '').trim()
+      return isSafeChatId(legacyId) && legacyId.endsWith('@g.us') ? legacyId : ''
+    })()
+const listenerIngestionHandler = createListenerIngestionHandler({
+  secret: process.env.WHATSAPP_LISTENER_INGEST_SECRET,
+  sourceChatId: listenerSourceChatId,
+  intakeRepository: whatsappIntakeRepository,
+  jobsRepository,
+  chatRepository: whatsappChatRepository
+})
+const chatDiscoveryHandler = createChatDiscoveryHandler({
+  secret: process.env.WHATSAPP_LISTENER_INGEST_SECRET,
+  chatRepository: whatsappChatRepository
+})
+const whatsappProvider = createMetaWhatsAppProvider({
+  appSecret: process.env.WHATSAPP_APP_SECRET,
+  verifyToken: process.env.WHATSAPP_WEBHOOK_VERIFY_TOKEN,
+  phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
+  businessAccountId: process.env.WHATSAPP_BUSINESS_ACCOUNT_ID,
+  replayWindowSeconds: process.env.WHATSAPP_REPLAY_WINDOW_SECONDS,
+  futureSkewSeconds: process.env.WHATSAPP_FUTURE_SKEW_SECONDS
+})
+const webhookRateLimiter = configuredRateLimit({
+  maxRequests: process.env.WHATSAPP_RATE_LIMIT_MAX_REQUESTS,
+  windowSeconds: process.env.WHATSAPP_RATE_LIMIT_WINDOW_SECONDS
+})
+const webhookError = (req, res, status, message) => res.status(status).json({ message, requestId: req.requestId })
+
+const handleWhatsAppWebhook = (req, res, next) => {
+  if (req.params.provider !== whatsappProvider.name) return webhookError(req, res, 404, 'WhatsApp provider is not configured')
+  if (!webhookRateLimiter.allow(req.ip || 'unknown')) return webhookError(req, res, 429, 'Too many webhook requests')
+  if (!process.env.WHATSAPP_APP_SECRET) return webhookError(req, res, 503, 'WhatsApp webhook authentication is not configured')
+  const rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from('')
+  if (!whatsappProvider.verifyWebhookRequest(req, rawBody)) return webhookError(req, res, 401, 'Invalid webhook authentication')
+  let payload
+  try { payload = JSON.parse(rawBody.toString('utf8')) } catch { return webhookError(req, res, 400, 'Malformed webhook JSON') }
+  let normalized
+  try {
+    normalized = whatsappProvider.normalize(payload)
+    whatsappProvider.validateTimestamp(normalized.receivedAt)
+  } catch { return webhookError(req, res, 400, 'Invalid WhatsApp webhook payload') }
+  try {
+    const events = Array.isArray(normalized) ? normalized : [normalized]
+    const results = []
+    for (const event of events) {
+      const received = whatsappIntakeRepository.receive(event, 'whatsapp:webhook')
+      if (received.error) return webhookError(req, res, 422, received.error)
+      if (received.duplicate) { results.push({ intakeId: received.item.id, duplicate: true }); continue }
+      const processed = whatsappIntakeRepository.process(received.item.id, jobsRepository.listAll(), 'whatsapp:webhook')
+      if (processed.error) return webhookError(req, res, 422, processed.error)
+      results.push({ intakeId: processed.item.id, status: processed.item.status })
+    }
+    return res.status(202).json({ accepted: true, results })
+  } catch (error) { return next(error) }
+}
+
+const handleWhatsAppChallenge = (req, res) => {
+  if (req.params.provider !== whatsappProvider.name) return res.status(404).send('Not found')
+  const challenge = whatsappProvider.verifyChallenge(req)
+  return challenge ? res.status(200).send(challenge) : res.status(403).send('Forbidden')
+}
 
 const createTransporter = () => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return null
@@ -305,6 +395,17 @@ const workflowBody = (body, existing, userEmail) => {
 }
 
 app.use(cors(process.env.CORS_ORIGIN ? { origin: process.env.CORS_ORIGIN } : undefined))
+app.use((req, res, next) => {
+  const supplied = String(req.get('x-request-id') || '').replace(/[^a-zA-Z0-9._-]/g, '').slice(0, 80)
+  const requestId = supplied || crypto.randomUUID()
+  req.requestId = requestId
+  res.set('x-request-id', requestId)
+  next()
+})
+app.get('/api/webhooks/whatsapp/:provider', handleWhatsAppChallenge)
+app.post('/api/webhooks/whatsapp/:provider', express.raw({ type: 'application/json', limit: '64kb' }), durablePersistence.middleware, handleWhatsAppWebhook)
+app.post('/api/internal/whatsapp-intakes', express.json({ limit: '64kb' }), durablePersistence.middleware, listenerIngestionHandler)
+app.post('/api/internal/whatsapp-chats/discover', express.json({ limit: '8kb' }), durablePersistence.middleware, chatDiscoveryHandler)
 app.use(express.json({ limit: '10mb' }))
 fs.mkdirSync(MEDIA_DIR, { recursive: true })
 app.use(['/media', '/api/media'], express.static(MEDIA_DIR))
@@ -401,9 +502,9 @@ app.post('/api/admin/login', (req, res) => {
   }
   if (previousAttempts.count >= 5) return res.status(429).json({ message: 'Too many login attempts. Try again later.' })
   const store = readStore()
-  const admin = store.admins.find((entry) => entry.email === email)
+  const admin = verifyAdminCredentials(store.admins, email, password)
 
-  if (!admin || !bcrypt.compareSync(password || '', admin.passwordHash)) {
+  if (!admin) {
     previousAttempts.count += 1
     loginAttempts.set(attemptKey, previousAttempts)
     logActivity(email, 'failed_login', 'security')
@@ -648,6 +749,15 @@ app.post('/api/admin/jobs/:id/status', requireAuth, (req, res) => {
 })
 
 const requireIntakeAdmin = requireMinimumRole('admin')
+app.get('/api/admin/whatsapp-chats', requireAuth, requireIntakeAdmin, (req, res) => {
+  res.json(whatsappChatRepository.list())
+})
+app.put('/api/admin/whatsapp-chats/:chatId/monitoring', requireAuth, requireIntakeAdmin, (req, res) => {
+  const result = whatsappChatRepository.setMonitoring(req.params.chatId, req.body?.enabled)
+  if (result.error === 'chat_not_found') return res.status(404).json({ message: 'WhatsApp chat not found' })
+  if (result.error) return res.status(422).json({ message: 'Invalid WhatsApp chat selection' })
+  res.json(result.chat)
+})
 app.get('/api/admin/whatsapp-intakes', requireAuth, requireIntakeAdmin, (req, res) => {
   const status = String(req.query.status || '')
   const items = whatsappIntakeRepository.list().filter((item) => !status || item.status === status)
@@ -873,6 +983,16 @@ app.post('/api/sendMail', async (req, res) => {
     console.error('Error sending email:', error)
     return res.status(500).json({ status: 'error', message: 'Failed to send email. Please try again later.' })
   }
+})
+
+app.use((error, req, res, next) => {
+  const isWhatsAppWebhook = req.path.startsWith('/api/webhooks/whatsapp/')
+  const isListenerIngestion = req.path === '/api/internal/whatsapp-intakes'
+  if (!isWhatsAppWebhook && !isListenerIngestion) return next(error)
+  const status = Number.isInteger(error?.status) && error.status >= 400 && error.status < 500 ? error.status : 500
+  console.error(isListenerIngestion ? 'WhatsApp listener intake request failed' : 'WhatsApp webhook request failed', { requestId: req.requestId, status, error: error?.name || 'Error' })
+  if (res.headersSent) return next(error)
+  return res.status(status).json({ message: status === 413 ? 'Webhook payload is too large' : 'Webhook processing failed', requestId: req.requestId })
 })
 
 if (!IS_VERCEL) {

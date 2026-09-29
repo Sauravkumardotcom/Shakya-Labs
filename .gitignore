@@ -24,6 +24,8 @@ pnpm-debug.log
 .env.production.local
 .env.development.local
 .env.test.local
+.wwebjs_auth/
+.wwebjs_cache/
 
 # Build outputs
 dist/

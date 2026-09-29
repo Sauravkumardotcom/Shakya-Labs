@@ -93,11 +93,13 @@ Your Shakya Labs website is ready for production. Follow these steps to deploy i
 
 ### 1. Environment Variables
 
-Create a `.env.production` file:
+For a same-project Vercel deployment, leave `VITE_API_URL` empty so the frontend calls the API on the current origin. `vercel.json` rewrites `/api/*` requests to the Express function. Set `VITE_API_URL` only when the frontend and API are deployed separately, and use the base URL of the intended API deployment.
+
+For a same-project Vercel deployment, the value is:
 
 ```env
 VITE_APP_NAME=Shakya Labs
-VITE_API_URL=https://api.yourdomain.com
+VITE_API_URL=
 ```
 
 ### Durable Jobs Persistence

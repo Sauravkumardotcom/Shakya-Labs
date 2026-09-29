@@ -80,10 +80,8 @@ const validateJob = (job) => {
   return errors
 }
 
-const publicJob = (job) => {
-  const { sourceMessage, createdBy, updatedBy, ...safeJob } = job
-  return safeJob
-}
+const PUBLIC_JOB_FIELDS = ['id', 'slug', 'title', 'companyId', 'companyName', 'companyLogo', 'location', 'workMode', 'employmentType', 'experienceLevel', 'salaryMin', 'salaryMax', 'salaryCurrency', 'salaryPeriod', 'skills', 'category', 'description', 'responsibilities', 'requirements', 'qualifications', 'benefits', 'applicationUrl', 'applicationEmail', 'whatsappContact', 'deadline', 'source', 'sourceUrl', 'featured', 'views', 'status', 'createdAt', 'updatedAt', 'publishedAt']
+const publicJob = (job) => Object.fromEntries(PUBLIC_JOB_FIELDS.filter((field) => Object.hasOwn(job, field)).map((field) => [field, job[field]]))
 
 const createJobsRepository = ({ readStore, writeStore, logActivity }) => ({
   listPublic(query = {}) {
@@ -138,4 +136,4 @@ const createJobsRepository = ({ readStore, writeStore, logActivity }) => ({
   }
 })
 
-export { JOB_STATUSES, EMPLOYMENT_TYPES, WORK_MODES, createJobsRepository, normalizeJob, publicJob, validateJob }
+export { JOB_STATUSES, EMPLOYMENT_TYPES, WORK_MODES, PUBLIC_JOB_FIELDS, createJobsRepository, normalizeJob, publicJob, validateJob }

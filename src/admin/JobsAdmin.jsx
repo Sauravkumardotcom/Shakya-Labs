@@ -14,6 +14,7 @@ const arrayFields = new Set(['skills', 'responsibilities', 'requirements', 'qual
 const splitValues = (value) => String(value || '').split(',').map((item) => item.trim()).filter(Boolean)
 const formFromJob = (job) => Object.fromEntries(Object.entries({ ...emptyJob, ...job }).map(([key, value]) => [key, arrayFields.has(key) ? (value || []).join(', ') : key === 'deadline' && value ? String(value).slice(0, 10) : value]))
 const payloadFromForm = (form) => Object.fromEntries(Object.entries(form).map(([key, value]) => [key, arrayFields.has(key) ? splitValues(value) : value]))
+const intakeEditorDraft = (item) => item?.extracted ? JSON.stringify({ ...item.extracted, ...(Array.isArray(item.sourceUrls) && item.sourceUrls.length ? { sourceUrls: item.sourceUrls } : {}) }, null, 2) : ''
 
 function Notice({ notice }) { return notice ? <div className={`notice ${notice.type}`}>{notice.text}</div> : null }
 function AdminJobsHome({ canEdit, canAdmin }) {
@@ -58,13 +59,47 @@ function WhatsAppIntakePage({ canAdmin }) {
   const [items, setItems] = useState([]); const [selected, setSelected] = useState(null); const [loading, setLoading] = useState(true); const [notice, setNotice] = useState(null); const [senderName, setSenderName] = useState(''); const [senderPhone, setSenderPhone] = useState(''); const [rawMessage, setRawMessage] = useState(''); const [draftJson, setDraftJson] = useState(''); const [saving, setSaving] = useState(false)
   const load = () => { setLoading(true); api('/api/admin/whatsapp-intakes').then(setItems).catch((error) => setNotice({ type: 'error', text: error.message })).finally(() => setLoading(false)) }
   useEffect(() => { if (canAdmin) load() }, [canAdmin])
-  const open = async (id) => { try { const item = await api(`/api/admin/whatsapp-intakes/${id}`); setSelected(item); setDraftJson(item.extracted ? JSON.stringify(item.extracted, null, 2) : '') } catch (error) { setNotice({ type: 'error', text: error.message }) } }
+  const open = async (id) => { try { const item = await api(`/api/admin/whatsapp-intakes/${id}`); setSelected(item); setDraftJson(intakeEditorDraft(item)) } catch (error) { setNotice({ type: 'error', text: error.message }) } }
   const receive = async (event) => { event.preventDefault(); setSaving(true); setNotice(null); try { const item = await api('/api/admin/whatsapp-intakes', { method: 'POST', body: JSON.stringify({ senderName, senderPhone, rawMessage }) }); setSenderName(''); setSenderPhone(''); setRawMessage(''); load(); open(item.id) } catch (error) { setNotice({ type: 'error', text: error.message }) } finally { setSaving(false) } }
-  const process = async () => { if (!selected) return; try { const item = await api(`/api/admin/whatsapp-intakes/${selected.id}/process`, { method: 'POST' }); setSelected(item); setDraftJson(JSON.stringify(item.extracted || {}, null, 2)); load() } catch (error) { setNotice({ type: 'error', text: error.message }) } }
-  const saveDraft = async () => { if (!selected) return; try { const extracted = JSON.parse(draftJson); const item = await api(`/api/admin/whatsapp-intakes/${selected.id}`, { method: 'PUT', body: JSON.stringify({ extracted }) }); setSelected(item); setDraftJson(JSON.stringify(item.extracted || {}, null, 2)); load() } catch (error) { setNotice({ type: 'error', text: error.message.includes('JSON') ? 'Draft must contain valid JSON.' : error.message }) } }
+  const process = async () => { if (!selected) return; try { const item = await api(`/api/admin/whatsapp-intakes/${selected.id}/process`, { method: 'POST' }); setSelected(item); setDraftJson(intakeEditorDraft(item)); load() } catch (error) { setNotice({ type: 'error', text: error.message }) } }
+  const saveDraft = async () => { if (!selected) return; try { const edited = JSON.parse(draftJson); const { sourceUrls, ...extracted } = edited; const item = await api(`/api/admin/whatsapp-intakes/${selected.id}`, { method: 'PUT', body: JSON.stringify({ extracted }) }); setSelected(item); setDraftJson(intakeEditorDraft(item)); load() } catch (error) { setNotice({ type: 'error', text: error.message.includes('JSON') ? 'Draft must contain valid JSON.' : error.message }) } }
   const action = async (name) => { if (!selected) return; try { const item = await api(`/api/admin/whatsapp-intakes/${selected.id}/${name}`, { method: 'POST' }); setSelected(item.item || item); load() } catch (error) { setNotice({ type: 'error', text: error.message }) } }
   if (!canAdmin) return <div className="empty-state">Admin access is required to review WhatsApp intake.</div>
   return <><div className="jobs-admin-toolbar"><div><span className="eyebrow">Jobs Portal / intake</span><h1>WhatsApp inbox</h1><p className="muted">Paste a job message, clean the extracted fields, and approve it into a draft.</p></div></div><Notice notice={notice} /><div className="jobs-intake-layout"><section><form className="panel editor-form" onSubmit={receive}><h2>Manual intake</h2><label className="field"><span>Sender name</span><input value={senderName} onChange={(event) => setSenderName(event.target.value)} /></label><label className="field"><span>Sender phone</span><input value={senderPhone} onChange={(event) => setSenderPhone(event.target.value)} /></label><label className="field"><span>WhatsApp message *</span><textarea required rows="12" value={rawMessage} onChange={(event) => setRawMessage(event.target.value)} placeholder="Title: Backend Engineer\nCompany: Example Co\nLocation: Remote\nDescription: ..." /></label><button className="primary-button" disabled={saving}>{saving ? 'Receiving...' : 'Receive message'}</button></form><div className="panel jobs-admin-list"><h2>Inbox</h2>{loading ? <div className="loading-state">Loading intake...</div> : items.length ? items.map((item) => <button className={`jobs-admin-row ${selected?.id === item.id ? 'active' : ''}`} key={item.id} onClick={() => open(item.id)}><span><strong>{item.senderName || item.senderPhone || 'Unknown sender'}</strong><small>{new Date(item.receivedAt).toLocaleString()}</small></span><small className={`status-badge status-${item.status}`}>{item.status.replace('_', ' ')}</small></button>) : <div className="empty-state">No WhatsApp messages yet.</div>}</div></section><section>{selected ? <div className="panel editor-form"><div className="jobs-admin-toolbar"><div><span className="eyebrow">{selected.source}</span><h2>Review intake</h2><small>{selected.status}</small></div></div><h3>Original message</h3><pre className="jobs-raw-message">{selected.rawMessage}</pre><h3>Extracted / cleaned job</h3>{selected.missingFields?.length ? <div className="notice error">Missing or uncertain: {selected.missingFields.join(', ')}</div> : <div className="notice success">Required fields present</div>}{selected.duplicateCandidates?.length ? <div className="notice error">Possible duplicates: {selected.duplicateCandidates.map((job) => `${job.title} at ${job.companyName}`).join('; ')}</div> : null}<textarea className="jobs-draft-json" rows="24" value={draftJson} onChange={(event) => setDraftJson(event.target.value)} placeholder="Process the message to extract a draft." disabled={!selected.extracted} /><div className="form-actions"><button className="secondary-button" type="button" onClick={process} disabled={selected.status === 'approved' || selected.status === 'rejected'}>Process job</button><button className="secondary-button" type="button" onClick={saveDraft} disabled={!selected.extracted || selected.status === 'approved'}>Save draft</button><button className="danger-button" type="button" onClick={() => action('reject')} disabled={selected.status === 'approved' || selected.status === 'rejected'}>Reject</button><button className="primary-button" type="button" onClick={() => action('approve')} disabled={!selected.extracted || selected.status === 'approved'}>Approve as draft</button></div></div> : <div className="panel empty-state">Select an intake message to review.</div>}</section></div></>
+}
+function WhatsAppChatsPage({ canAdmin }) {
+  const [chats, setChats] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [savingId, setSavingId] = useState('')
+  const [notice, setNotice] = useState(null)
+  const load = () => api('/api/admin/whatsapp-chats').then(setChats).catch((error) => setNotice({ type: 'error', text: error.message })).finally(() => setLoading(false))
+  useEffect(() => { if (canAdmin) load(); else setLoading(false) }, [canAdmin])
+  const setMonitoring = async (chat, enabled) => {
+    setSavingId(chat.chatId)
+    setNotice(null)
+    try {
+      const updated = await api(`/api/admin/whatsapp-chats/${encodeURIComponent(chat.chatId)}/monitoring`, {
+        method: 'PUT',
+        body: JSON.stringify({ enabled })
+      })
+      setChats((current) => current.map((item) => item.chatId === updated.chatId ? updated : item))
+    } catch (error) {
+      setNotice({ type: 'error', text: error.message })
+    } finally {
+      setSavingId('')
+    }
+  }
+  if (!canAdmin) return <div className="empty-state">Admin access is required to manage WhatsApp chat monitoring.</div>
+  return <>
+    <div className="jobs-admin-toolbar"><div><span className="eyebrow">Jobs Portal / intake</span><h1>WhatsApp chats</h1><p className="muted">Select which discovered chats may enter the draft-intake workflow. Jobs remain drafts until reviewed manually.</p></div></div>
+    <Notice notice={notice} />
+    <div className="panel jobs-admin-list">
+      {loading ? <div className="loading-state">Loading discovered chats...</div> : chats.length ? chats.map((chat) => <div className="jobs-admin-row" key={chat.chatId}>
+        <div><strong>{chat.name || (chat.chatType === 'group' ? 'Unnamed group' : 'Unnamed personal chat')}</strong><span>{chat.chatType === 'group' ? 'Group' : 'Personal'} · {chat.chatId}</span><small>Discovered {new Date(chat.discoveredAt).toLocaleString()}</small></div>
+        <label className="toggle"><input type="checkbox" checked={chat.monitoringEnabled} disabled={savingId === chat.chatId} onChange={(event) => setMonitoring(chat, event.target.checked)} /><span>{chat.monitoringEnabled ? 'Monitor jobs' : 'Not monitored'}</span></label>
+      </div>) : <div className="empty-state">No chats discovered yet. Start the listener in managed chat monitoring mode to populate this list.</div>}
+    </div>
+  </>
 }
 function SettingsPage() { return <><div className="jobs-admin-toolbar"><div><span className="eyebrow">Jobs Portal</span><h1>Settings</h1></div></div><div className="panel empty-state">Portal settings are intentionally reserved for the database-backed phase.</div></> }
 
@@ -76,6 +111,7 @@ export default function JobsAdmin({ user }) {
   const path = useLocation().pathname
   if (path === '/admin/jobs/create') return <JobForm canEdit={canEdit} />
   if (path.startsWith('/admin/jobs/') && path.endsWith('/edit')) return <JobForm canEdit={canEdit} id={path.split('/')[3]} />
+  if (path === '/admin/jobs/whatsapp-chats') return <WhatsAppChatsPage canAdmin={canAdmin} />
   if (path === '/admin/jobs/whatsapp') return <WhatsAppIntakePage canAdmin={canAdmin} />
   if (path === '/admin/jobs/applications') return <ApplicationsPage canAdmin={canAdmin} />
   if (path === '/admin/jobs/companies') return <CompaniesPage canAdmin={canAdmin} />

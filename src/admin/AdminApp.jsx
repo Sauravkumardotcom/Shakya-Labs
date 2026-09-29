@@ -22,7 +22,7 @@ const navGroups = [
   { label: 'Overview', items: [['Dashboard', '/admin/dashboard', '⌂']] },
   { label: 'Website', items: [['Hero', '/admin/website/hero', '✦'], ['About', '/admin/website/about', '◈'], ['Statistics', '/admin/website/statistics', '#'], ['Footer', '/admin/website/footer', '⌄']] },
   { label: 'Content', items: [['Services', '/admin/services', '◫'], ['Products', '/admin/products', '▣'], ['Projects', '/admin/projects', '◇'], ['Testimonials', '/admin/testimonials', '❝'], ['Founder', '/admin/founder', '◎'], ['Certifications', '/admin/certifications', '✓']] },
-  { label: 'Jobs Portal', items: [['Jobs', '/admin/jobs', '↗', 'editor'], ['WhatsApp intake', '/admin/jobs/whatsapp', '⌁', 'admin'], ['Companies', '/admin/jobs/companies', '▤', 'admin'], ['Categories', '/admin/jobs/categories', '⊞', 'admin'], ['Applications', '/admin/jobs/applications', '✉', 'admin'], ['Job settings', '/admin/jobs/settings', '⚙', 'admin']] },
+  { label: 'Jobs Portal', items: [['Jobs', '/admin/jobs', '↗', 'editor'], ['WhatsApp chats', '/admin/jobs/whatsapp-chats', '◉', 'admin'], ['WhatsApp intake', '/admin/jobs/whatsapp', '⌁', 'admin'], ['Companies', '/admin/jobs/companies', '▤', 'admin'], ['Categories', '/admin/jobs/categories', '⊞', 'admin'], ['Applications', '/admin/jobs/applications', '✉', 'admin'], ['Job settings', '/admin/jobs/settings', '⚙', 'admin']] },
   { label: 'Management', items: [['Media Library', '/admin/media', '▧'], ['Messages', '/admin/messages', '✉'], ['SEO', '/admin/seo', '⌕']] },
   { label: 'System', items: [['Activity Logs', '/admin/activity-logs', '◷'], ['Users', '/admin/users', '♙'], ['Settings', '/admin/settings', '⚙']] }
 ];

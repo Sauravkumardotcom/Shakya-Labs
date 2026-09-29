@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 
 const INTAKE_STATUSES = ['received', 'processing', 'draft', 'needs_review', 'approved', 'rejected', 'error']
+const TERMINAL_STATUSES = new Set(['approved', 'rejected'])
 const WORK_MODES = ['remote', 'hybrid', 'onsite']
 const EMPLOYMENT_TYPES = ['full-time', 'part-time', 'contract', 'internship', 'freelance']
 const FIELD_LABELS = {
@@ -39,6 +40,14 @@ const LIST_FIELDS = new Set(['skills', 'responsibilities', 'requirements', 'qual
 const REQUIRED_JOB_FIELDS = ['title', 'companyName', 'location', 'description']
 
 const cleanText = (value) => String(value || '').replace(/\r/g, '').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
+const normalizeSourceUrls = (values) => [...new Set((Array.isArray(values) ? values : []).flatMap((value) => {
+  if (typeof value !== 'string') return []
+  const url = value.trim()
+  try {
+    const parsed = new URL(url)
+    return ['http:', 'https:'].includes(parsed.protocol) ? [url] : []
+  } catch { return [] }
+}))]
 const unique = (items) => [...new Set(items.map((item) => cleanText(item)).filter(Boolean))]
 const listValue = (value) => unique(String(value || '').split(/[,;|\n]|\s+•\s+/).map((item) => item.replace(/^[-*•]\s*/, '')))
 const normalizeUrl = (value) => { const match = String(value || '').match(/https?:\/\/[^\s<]+/i); return match ? match[0].replace(/[),.;]+$/, '') : '' }
@@ -86,7 +95,8 @@ const likelyDuplicates = (draft, jobs = []) => jobs.filter((job) => {
   const sameTitle = draft.title && job.title && draft.title.toLowerCase() === job.title.toLowerCase()
   const sameLocation = draft.location && job.location && draft.location.toLowerCase() === job.location.toLowerCase()
   const sameContact = (draft.applicationUrl && draft.applicationUrl === job.applicationUrl) || (draft.applicationEmail && draft.applicationEmail === job.applicationEmail)
-  return sameContact || (sameCompany && sameTitle) || (sameCompany && sameLocation && sameTitle)
+  const sameSourceUrl = [draft.sourceUrl, draft.applicationUrl].some((url) => url && (url === job.sourceUrl || url === job.applicationUrl))
+  return sameContact || sameSourceUrl || (sameCompany && sameTitle) || (sameCompany && sameLocation && sameTitle)
 }).map(({ sourceMessage, createdBy, updatedBy, ...job }) => job)
 
 const createWhatsappIntakeRepository = ({ readStore, writeStore, logActivity }) => ({
@@ -94,19 +104,50 @@ const createWhatsappIntakeRepository = ({ readStore, writeStore, logActivity }) 
   get(id) { return (readStore().whatsappIntakes || []).find((item) => item.id === id) || null },
   receive(input = {}, userEmail) {
     const rawMessage = cleanText(input.rawMessage)
-    if (!rawMessage || rawMessage.length > 20000) return { error: 'Raw WhatsApp message is required and must be under 20000 characters' }
-    const now = new Date().toISOString(); const store = readStore(); const item = { id: crypto.randomUUID(), rawMessage, senderName: cleanText(input.senderName).slice(0, 120), senderPhone: normalizePhone(input.senderPhone), senderId: cleanText(input.senderId).slice(0, 160), receivedAt: input.receivedAt && !Number.isNaN(new Date(input.receivedAt).getTime()) ? new Date(input.receivedAt).toISOString() : now, source: 'whatsapp', status: 'received', extracted: null, missingFields: [], duplicateCandidates: [], errorMessage: '', createdAt: now, updatedAt: now, createdBy: userEmail }
+    const sourceUrls = normalizeSourceUrls(input.sourceUrls)
+    if ((!rawMessage && !sourceUrls.length) || rawMessage.length > 20000) return { error: 'A raw WhatsApp message or source URL is required; message text must be under 20000 characters' }
+    const now = new Date().toISOString(); const store = readStore(); const provider = cleanText(input.provider || 'whatsapp').slice(0, 40); const providerEventId = cleanText(input.providerEventId).slice(0, 200)
+    if (providerEventId) {
+      const duplicate = (store.whatsappIntakes || []).find((entry) => entry.provider === provider && entry.providerEventId === providerEventId)
+      if (duplicate) return { item: duplicate, duplicate: true }
+    }
+    const item = { id: crypto.randomUUID(), rawMessage, sourceUrls, senderName: cleanText(input.senderName).slice(0, 120), senderPhone: normalizePhone(input.senderPhone), senderId: cleanText(input.senderId).slice(0, 160), receivedAt: input.receivedAt && !Number.isNaN(new Date(input.receivedAt).getTime()) ? new Date(input.receivedAt).toISOString() : now, source: 'whatsapp', provider, providerEventId, providerMessageId: cleanText(input.providerMessageId).slice(0, 200), providerMetadata: input.providerMetadata && typeof input.providerMetadata === 'object' ? input.providerMetadata : {}, status: 'received', extracted: null, missingFields: [], duplicateCandidates: [], errorMessage: '', createdAt: now, updatedAt: now, createdBy: userEmail }
     store.whatsappIntakes.unshift(item); writeStore(store); logActivity(userEmail, 'received', 'whatsapp_intake', { id: item.id }); return { item }
+  },
+  receiveFromListener(input = {}, jobs = [], userEmail = 'whatsapp:listener') {
+    const sourceUrls = normalizeSourceUrls(input.sourceUrls)
+    if (!sourceUrls.length) return { error: 'At least one trusted HTTP/HTTPS source URL is required' }
+    const result = this.receive({ ...input, provider: 'whatsapp-web', sourceUrls }, userEmail)
+    if (result.error || result.duplicate) return result
+    const store = readStore()
+    const item = store.whatsappIntakes.find((entry) => entry.id === result.item.id)
+    if (!item) return { error: 'WhatsApp intake was not available after receipt' }
+    const extracted = { ...emptyDraft(), sourceUrl: sourceUrls[0] }
+    const duplicateCandidates = [...new Map(sourceUrls
+      .flatMap((sourceUrl) => likelyDuplicates({ ...extracted, sourceUrl }, jobs))
+      .map((job) => [job.id || job.slug || `${job.title}:${job.companyName}`, job])).values()]
+    Object.assign(item, {
+      source: 'whatsapp',
+      status: 'draft',
+      extracted,
+      missingFields: missingFieldsForDraft(extracted),
+      duplicateCandidates,
+      updatedAt: new Date().toISOString(),
+      updatedBy: userEmail
+    })
+    writeStore(store)
+    return { item }
   },
   process(id, jobs, userEmail) {
     const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }
+    if (TERMINAL_STATUSES.has(item.status)) return { error: `WhatsApp intake is already ${item.status} and cannot be reprocessed` }
     const extraction = extractJob(item.rawMessage, item.receivedAt); const duplicateCandidates = likelyDuplicates(extraction.draft, jobs); Object.assign(item, { status: extraction.missingFields.length ? 'needs_review' : 'draft', extracted: extraction.draft, missingFields: extraction.missingFields, duplicateCandidates, errorMessage: '', updatedAt: new Date().toISOString(), updatedBy: userEmail }); writeStore(store); logActivity(userEmail, 'processed', 'whatsapp_intake', { id, status: item.status }); return { item }
   },
   updateDraft(id, draft, jobs, userEmail) {
-    const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; if (!item.extracted) return { error: 'Process the intake before editing its draft' }; const normalized = { ...item.extracted, ...draft, source: 'whatsapp' }; const missingFields = missingFieldsForDraft(normalized); const duplicateCandidates = likelyDuplicates(normalized, jobs); Object.assign(item, { extracted: normalized, missingFields, duplicateCandidates, status: missingFields.length ? 'needs_review' : 'draft', updatedAt: new Date().toISOString(), updatedBy: userEmail }); writeStore(store); logActivity(userEmail, 'updated', 'whatsapp_intake', { id }); return { item }
+    const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; if (TERMINAL_STATUSES.has(item.status)) return { error: `WhatsApp intake is already ${item.status} and cannot be edited` }; if (!item.extracted) return { error: 'Process the intake before editing its draft' }; const normalized = { ...item.extracted, ...draft, source: 'whatsapp' }; const missingFields = missingFieldsForDraft(normalized); const duplicateCandidates = likelyDuplicates(normalized, jobs); Object.assign(item, { extracted: normalized, missingFields, duplicateCandidates, status: missingFields.length ? 'needs_review' : 'draft', updatedAt: new Date().toISOString(), updatedBy: userEmail }); writeStore(store); logActivity(userEmail, 'updated', 'whatsapp_intake', { id }); return { item }
   },
-  reject(id, userEmail) { const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; item.status = 'rejected'; item.updatedAt = new Date().toISOString(); item.updatedBy = userEmail; writeStore(store); logActivity(userEmail, 'rejected', 'whatsapp_intake', { id }); return { item } },
-  approve(id, jobsRepository, userEmail) { const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; if (!item.extracted) return { error: 'Process the intake before approval' }; if (item.status === 'approved') return { error: 'WhatsApp intake is already approved' }; const result = jobsRepository.save({ ...item.extracted, source: 'whatsapp', sourceMessage: item.rawMessage, status: 'draft' }, null, userEmail); if (result.error) return { error: result.error, conflict: result.conflict }; const updatedStore = readStore(); const updatedItem = updatedStore.whatsappIntakes.find((entry) => entry.id === id); Object.assign(updatedItem, { status: 'approved', jobId: result.item.id, updatedAt: new Date().toISOString(), updatedBy: userEmail }); writeStore(updatedStore); logActivity(userEmail, 'approved', 'whatsapp_intake', { id, jobId: updatedItem.jobId }); return { item: updatedItem, job: result.item } }
+  reject(id, userEmail) { const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; if (TERMINAL_STATUSES.has(item.status)) return { error: `WhatsApp intake is already ${item.status}` }; item.status = 'rejected'; item.updatedAt = new Date().toISOString(); item.updatedBy = userEmail; writeStore(store); logActivity(userEmail, 'rejected', 'whatsapp_intake', { id }); return { item } },
+  approve(id, jobsRepository, userEmail) { const store = readStore(); const item = store.whatsappIntakes.find((entry) => entry.id === id); if (!item) return { error: 'WhatsApp intake not found' }; if (TERMINAL_STATUSES.has(item.status)) return { error: `WhatsApp intake is already ${item.status} and cannot be approved` }; if (!item.extracted) return { error: 'Process the intake before approval' }; const result = jobsRepository.save({ ...item.extracted, source: 'whatsapp', sourceMessage: item.rawMessage, status: 'draft' }, null, userEmail); if (result.error) return { error: result.error, conflict: result.conflict }; const updatedStore = readStore(); const updatedItem = updatedStore.whatsappIntakes.find((entry) => entry.id === id); Object.assign(updatedItem, { status: 'approved', jobId: result.item.id, updatedAt: new Date().toISOString(), updatedBy: userEmail }); writeStore(updatedStore); logActivity(userEmail, 'approved', 'whatsapp_intake', { id, jobId: updatedItem.jobId }); return { item: updatedItem, job: result.item } }
 })
 
 export { INTAKE_STATUSES, createWhatsappIntakeRepository, extractJob, likelyDuplicates }

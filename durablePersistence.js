@@ -6,7 +6,22 @@ import { AsyncLocalStorage } from 'async_hooks'
 const normalizedCollections = ['companies', 'jobCategories', 'jobs', 'applications', 'whatsappIntakes', 'activity']
 const schemaPath = path.join(process.cwd(), 'schema.sql')
 
-const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, legacyWrite }) => {
+const normalizeState = (data) => {
+  const state = typeof data === 'string' ? JSON.parse(data) : data
+  if (!state || typeof state !== 'object' || Array.isArray(state)) {
+    throw new TypeError('app_state.data must be a JSON object')
+  }
+  return state
+}
+
+const resolveInitialState = (rows, defaultData, readSeed, createInitialAdmin) => {
+  if (rows.length) return normalizeState(rows[0].data)
+  const seed = { ...defaultData, ...readSeed() }
+  if (!(seed.admins || []).length && createInitialAdmin) seed.admins = createInitialAdmin()
+  return seed
+}
+
+const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, legacyWrite, createInitialAdmin }) => {
   const databaseUrl = process.env.DATABASE_URL
   const requestStore = new AsyncLocalStorage()
   let client
@@ -27,9 +42,9 @@ const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, leg
     initialized = (async () => {
       await client.unsafe(fs.readFileSync(schemaPath, 'utf8'))
       const rows = await client`SELECT data FROM app_state WHERE id = TRUE`
+      const initialState = resolveInitialState(rows, defaultData, readSeed, createInitialAdmin)
       if (!rows.length) {
-        const seed = { ...defaultData, ...readSeed() }
-        await client`INSERT INTO app_state (id, data) VALUES (TRUE, ${JSON.stringify(seed)}::jsonb)`
+        await client`INSERT INTO app_state (id, data) VALUES (TRUE, ${JSON.stringify(initialState)}::jsonb)`
         console.log('Initialized durable database from existing JSON data; no existing database data was overwritten.')
       }
     })()
@@ -80,12 +95,14 @@ const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, leg
       if (process.env.VERCEL === '1') return next(new Error('DATABASE_URL must be configured on Vercel for durable persistence'))
       return next()
     }
+    let connection
     try {
       await initialize()
-      const connection = await client.reserve()
+      connection = await client.reserve()
       await connection`BEGIN`
       const rows = await connection`SELECT data FROM app_state WHERE id = TRUE FOR UPDATE`
-      const data = await hydrate(connection, rows[0]?.data || JSON.parse(JSON.stringify(defaultData)))
+      const persistedData = rows.length ? rows[0].data : JSON.parse(JSON.stringify(defaultData))
+      const data = await hydrate(connection, normalizeState(persistedData))
       const context = { connection, data, dirty: false, finalized: false }
       const finalize = async (rollback = false) => {
         if (context.finalized) return
@@ -99,6 +116,9 @@ const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, leg
       res.once('close', () => finalize(true))
       requestStore.run(context, () => next())
     } catch (error) {
+      if (connection) {
+        try { await connection`ROLLBACK` } finally { connection.release() }
+      }
       next(error)
     }
   }
@@ -106,4 +126,4 @@ const createDurablePersistence = ({ defaultData, sourceDataPath, legacyRead, leg
   return { initialize, middleware, readStore, writeStore, usingDatabase: Boolean(databaseUrl) }
 }
 
-export { createDurablePersistence }
+export { createDurablePersistence, resolveInitialState }
